@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-
 '''
 #y = mx + b    -> in algebra
 #y = b0 + b1x  -> in statistics
@@ -21,15 +20,16 @@ x_squared_sum = 140
 expected m = 2.4142857142857146
 '''
 
-
-def plot_straight_line(x_values, y_values):
-	plt.plot(x_values, y_values, color='red', label='linear regression')
+def plot_straight_line(orig_x, orig_y, x_values, y_values):
+	plt.scatter(orig_x, orig_y, color='red', label='original datapoints')
+	plt.scatter(x_values, y_values, color='blue', label='linear regression')
 	plt.xlabel('km')
 	plt.ylabel('price')
 	plt.title('Linear regression')
 	plt.legend()
 	plt.grid(True)
 	plt.show()
+
 
 
 def calculate_slope(n, x_sum, y_sum, xy_sum, x_squared_sum):
@@ -40,12 +40,14 @@ def calculate_slope(n, x_sum, y_sum, xy_sum, x_squared_sum):
 	return m
 
 
+
 def calculate_b_intercept(n, x_sum, y_sum, m):
 	b_nominator = y_sum - (m * x_sum)
 	b_denominator = n
 	b = b_nominator / b_denominator
 
 	return b
+
 
 
 def calculate_least_squares_values(df):
@@ -60,6 +62,23 @@ def calculate_least_squares_values(df):
 
 	return n, x_sum, y_sum, xy_sum, x_squared_sum
 
+'''
+https://www.youtube.com/watch?v=P6oIYmK4XdI
+'''
+def sum_of_squared_residuals(df, y_values):
+
+	SSR = 0
+	for item0, item1, item2 in zip(df['km'], df['price'], y_values):
+		# print(f'At km: {item0}: {item1} is orig, {item2} is the line')
+		observed_min_predicted_value_squared = (item1 - item2)**2
+		SSR += observed_min_predicted_value_squared
+		print(f'The sum of squared residuals is : {SSR}')
+		#these are the actual differences for SSE
+	
+	#this seems waaay to big. maybe we should normalize stuff?
+	return 
+
+
 def least_squares(df):
 	n, x_sum, y_sum, xy_sum, x_squared_sum = calculate_least_squares_values(df)
 	
@@ -72,23 +91,33 @@ def least_squares(df):
 	x_values = df['km']
 	y_values = m * x_values + b
 
-	plot_straight_line(x_values, y_values)
+	# frames = [df['price'], y_values]
+	df3 = pd.DataFrame({
+		"Original Price" : [df['price']],
+		"Straight line " : [y_values],
+	})
 
+	#what is y value of the line at coordinate x
+	#what is y value of the original datapoint at coordinate x
+
+	# print(type(df['km']), type(y_values))
+	# plot_straight_line(df['km'].values, df['price'].values, x_values, y_values)
+	sum_of_squared_residuals(df, y_values)
 
 
 def create_graph_for_three(df):
 	data_np_row_three = df['km'].head(3).values
 	data_np_col_three = df['price'].head(3).values
 	
-
 	plt.plot(data_np_row_three, data_np_col_three, label='price estimation', marker='o', linestyle='')
 	plt.grid(True)
 	plt.show()
 
 
+
 if __name__ == "__main__":
 
-	#maybe include guard in case failure
+	#maybe include guard in case of failure
 	df = pd.read_csv('data.csv')
 	row, col = df.shape
 
