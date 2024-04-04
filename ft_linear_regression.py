@@ -89,6 +89,33 @@ def mean_squared_error(df, y_values):
 
 	return MSE
 
+
+def variation_around_the_mean_of_y(df, y_values):
+	#because we try to predict y respect to x y = f(x)
+	#get the mean of the y values in the dataset
+	mean_of_y = np.mean(df['price'])
+	return mean_of_y
+	# print(mean_of_y)
+
+def sum_of_squared_residuals_for_mean(df, mean):
+	SSR_for_mean = np.sum((df['price'] - mean)**2)
+	# SSR = 0
+	# for item0, item1, item2 in zip(df['km'], df['price'], y_values):
+	# 	# print(f'At km: {item0}: {item1} is orig, {item2} is the line')
+	# 	observed_min_predicted_value_squared = (item1 - item2)**2
+	# 	SSR += observed_min_predicted_value_squared
+	# 	print(f'The sum of squared residuals is : {SSR}')
+		#these are the actual differences for SSE
+	# this seems waaay to big. maybe we should normalize stuff?
+	return SSR_for_mean
+
+
+def calculate_R2(df, y_values):
+	var_mean = variation_around_the_mean_of_y(df, y_values)
+	ssr_for_mean = sum_of_squared_residuals_for_mean(df, var_mean)
+	print(ssr_for_mean)
+	
+
 '''
 https://www.youtube.com/watch?v=P6oIYmK4XdI
 When using sum of squared residuals we are using vertical distance instead of perpendicular
@@ -123,6 +150,7 @@ def least_squares(df):
 		"Original Price" : [df['price']],
 		"Straight line " : [y_values],
 	})
+	calculate_R2(df, y_values)
 
 	#what is y value of the line at coordinate x
 	#what is y value of the original datapoint at coordinate x
@@ -130,8 +158,9 @@ def least_squares(df):
 	# print(type(df['km']), type(y_values))
 	# plot_straight_line(df['km'].values, df['price'].values, x_values, y_values)
 	# sum_of_squared_residuals(df, y_values)
-	MSE = mean_squared_error(df, y_values)
-	print(MSE)
+	# MSE = mean_squared_error(df, y_values)
+	# print(MSE)
+	# plot_straight_line(df['km'], df['price'], x_values, y_values)
 
 
 
