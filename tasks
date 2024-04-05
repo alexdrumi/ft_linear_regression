@@ -1,2 +1,1 @@
-#read the data
-#create a 2d plot to and put the data on to visualize
+#create a function for the 'fitted line' so we can use it for R2

@@ -62,6 +62,8 @@ def calculate_least_squares_values(df):
 
 	return n, x_sum, y_sum, xy_sum, x_squared_sum
 
+
+
 '''
 We could have divided every single (Observedi - Predictedi)ˆ2 individually like: 
 (Observed1 - Predicted1)ˆ2 / 2 
@@ -90,14 +92,23 @@ def mean_squared_error(df, y_values):
 	return MSE
 
 
+
 def variation_around_the_mean_of_y(df, y_values):
-	#because we try to predict y respect to x y = f(x)
-	#get the mean of the y values in the dataset
 	mean_of_y = np.mean(df['price'])
 	return mean_of_y
-	# print(mean_of_y)
 
-def sum_of_squared_residuals_for_mean(df, mean):
+
+
+def sum_of_squared_residuals_for_mean_np(df):
+	numpy_dataset = np.array(df)
+	mean = numpy_dataset.mean()
+	SSR_np = np.sum((numpy_dataset - mean)**2)
+
+	return SSR_np
+
+
+
+def sum_of_squared_residuals_for_mean_df(df, mean):
 	SSR_for_mean = np.sum((df['price'] - mean)**2)
 	# SSR = 0
 	# for item0, item1, item2 in zip(df['km'], df['price'], y_values):
@@ -110,11 +121,14 @@ def sum_of_squared_residuals_for_mean(df, mean):
 	return SSR_for_mean
 
 
+
 def calculate_R2(df, y_values):
-	var_mean = variation_around_the_mean_of_y(df, y_values)
-	ssr_for_mean = sum_of_squared_residuals_for_mean(df, var_mean)
+	# var_mean = variation_around_the_mean_of_y(df, y_values)
+	# ssr_for_mean = sum_of_squared_residuals_for_mean_df(df, var_mean)
+	ssr_for_mean = sum_of_squared_residuals_for_mean_np(df)
 	print(ssr_for_mean)
-	
+
+
 
 '''
 https://www.youtube.com/watch?v=P6oIYmK4XdI
@@ -122,15 +136,9 @@ When using sum of squared residuals we are using vertical distance instead of pe
 '''
 def sum_of_squared_residuals(df, y_values):
 	SSR = np.sum((df['price'] -  y_values)**2)
-	# SSR = 0
-	# for item0, item1, item2 in zip(df['km'], df['price'], y_values):
-	# 	# print(f'At km: {item0}: {item1} is orig, {item2} is the line')
-	# 	observed_min_predicted_value_squared = (item1 - item2)**2
-	# 	SSR += observed_min_predicted_value_squared
-	# 	print(f'The sum of squared residuals is : {SSR}')
-		#these are the actual differences for SSE
 	# this seems waaay to big. maybe we should normalize stuff?
 	return SSR
+
 
 
 def least_squares(df):
@@ -172,8 +180,11 @@ def create_graph_for_three(df):
 	plt.grid(True)
 	plt.show()
 
+#we will eventually have to convert the pd.read_csv to np array
+# df = pd.read_csv('your_file.csv')
 
-
+# # Convert DataFrame to NumPy array
+# data = df.to_numpy()
 if __name__ == "__main__":
 
 	#maybe include guard in case of failure
@@ -183,5 +194,18 @@ if __name__ == "__main__":
 	data_np_row = df['km'].values
 	data_np_col = df['price'].values
 
+	#practice dataset just like in the statquest book
+	df_test = np.array([2.3, 1.2, 2.7, 1.4, 2.2])
+	df_test_mean = df_test.mean()
+	# SSR_of_mean = np.sum((df_test - df_test_mean)**2)
+
+	# # print(df_test.mean())
+	# # print(f'{test_mean} is testmean')
+	# # print(f'{df_test["test_values"]} is testvalues')
+
+
+	# print(SSR_of_mean)
 	# create_graph_for_three(df)
-	least_squares(df)
+	# least_squares(df_test)
+	SSR_for_mean = sum_of_squared_residuals_for_mean_np(df_test)
+	print(SSR_for_mean)
