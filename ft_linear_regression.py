@@ -70,7 +70,7 @@ def calculate_slope(n, x_sum, y_sum, xy_sum, x_squared_sum):
 	m_nominator = (n * xy_sum) - (x_sum * y_sum)
 	m_denominator = (n * x_squared_sum) - (x_sum ** 2)
 	m = m_nominator / m_denominator
-	print(f'returning slope of {m}')
+
 	return m
 
 
@@ -86,8 +86,7 @@ def calculate_y_intercept(n, x_sum, y_sum, m):
 	b_nominator = y_sum - (m * x_sum)
 	b_denominator = n
 	b = b_nominator / b_denominator
-	print(f'returning y intercept of {b}')
-
+	
 	return b
 
 
@@ -121,44 +120,42 @@ def mean_squared_error(df, y_values):
 	return MSE
 
 
-
-
 def variation_around_the_mean_of_y(df, y_values):
 	mean_of_y = np.mean(df['price'])
 	return mean_of_y
 
 
+#y values could be the mean values but also the y values of the fitted line
+def calculate_R2(observed_y, predicted_y_fitted, predicted_y_mean):
+	ssr_for_fitted_line = sum_of_squared_residuals(observed_y, predicted_y_fitted)
+	ssr_for_mean = sum_of_squared_residuals(observed_y, predicted_y_mean)
 
-def sum_of_squared_residuals_for_mean_np(df):
-	numpy_dataset = np.array(df)
-	mean = numpy_dataset.mean()
-	SSR_np = np.sum((numpy_dataset - mean)**2)
-
-	return SSR_np
-
-
-
-def sum_of_squared_residuals_for_mean_df(df, mean):
-	SSR_for_mean = np.sum((df['price'] - mean)**2)
-	return SSR_for_mean
+	R2 = (ssr_for_fitted_line - ssr_for_mean) / ssr_for_mean
+	return R2
 
 
+'''
 
-def calculate_R2(df, y_values):
-	# var_mean = variation_around_the_mean_of_y(df, y_values)
-	# ssr_for_mean = sum_of_squared_residuals_for_mean_df(df, var_mean)
-	ssr_for_mean = sum_of_squared_residuals_for_mean_np(df)
-	print(ssr_for_mean)
+def calculate_R2(observed_y, predicted_y_fitted):
+    # Calculate SSR
+    ssr = sum_of_squared_residuals(observed_y, predicted_y_fitted)
 
+    # Calculate SST
+    mean_y = np.mean(observed_y)
+    sst = np.sum((observed_y - mean_y)**2)
 
+    # Calculate R^2
+    R2 = 1 - (ssr / sst)
+    return R2
+
+'''
 
 '''
 https://www.youtube.com/watch?v=P6oIYmK4XdI
 When using sum of squared residuals we are using vertical distance instead of perpendicular
 '''
-def sum_of_squared_residuals(df, y_values):
-	SSR = np.sum((df['price'] -  y_values)**2)
-	# this seems waaay to big. maybe we should normalize stuff?
+def sum_of_squared_residuals(observed_y, predicted_y):
+	SSR = np.sum((observed_y -  predicted_y)**2)
 	return SSR
 
 
@@ -176,18 +173,14 @@ def least_squares(df):
 	x_values = df['km']
 	y_values = m * x_values + b
 
-	# frames = [df['price'], y_values]
-	# df3 = pd.DataFrame({
-	# 	"Original Price" : [df['price']],
-	# 	"Straight line " : [y_values],
-	# })
-	calculate_R2(df, y_values)
+	#preparing variables for ssr mean
+	mean_for_ssr = np.mean(df['price'])
+	array_mean_for_ssr = np.full(df.shape[0], mean_for_ssr)
+	observed_y = df['price'].values
 
-	plot_straight_line(df['km'].values, df['price'].values, x_values, y_values)
-	# sum_of_squared_residuals(df, y_values)
-	# MSE = mean_squared_error(df, y_values)
-	# print(MSE)
-	# plot_straight_line(df['km'], df['price'], x_values, y_values)
+
+	R2 = calculate_R2(observed_y, y_values, array_mean_for_ssr)
+	print(R2)
 
 
 
@@ -222,16 +215,24 @@ if __name__ == "__main__":
 	# # print(f'{test_mean} is testmean')
 	# # print(f'{df_test["test_values"]} is testvalues')
 
-	
+	# data_organic_chem_tutor = {
+	# 	'km': [1,2,3,4,5,6,7],
+	# 	'price': [1.5, 3.8, 6.7, 9.0, 11.2, 13.6, 16.0]}
 
-	# print(SSR_of_mean)
-	# create_graph_for_three(df)
-	data_organic_chem_tutor = {
-		'km': [1,2,3,4,5,6,7],
-		'price': [1.5, 3.8, 6.7, 9.0, 11.2, 13.6, 16.0]}
 
-	
-	df_organic_chem_tutor = pd.DataFrame(data_organic_chem_tutor)
-	least_squares(df_organic_chem_tutor)
-	# SSR_for_mean = sum_of_squared_residuals_for_mean_np(df_test)
-	# print(SSR_for_mean)
+	# data_statquest = {
+	# 	'km': [1,2,3,4,5],
+	# 	'price': [2.3, 1.2, 2.7, 1.4, 2.2]
+	# }
+
+	# test data from statquest book	
+	# observed_y = np.array([1.2, 2.2, 1.4, 2.7, 2.3])
+	# predicted_y = np.array([1.1, 1.8, 1.9, 2.4, 2.5])
+	# SSR_np = np.sum((observed_y - predicted_y)**2)
+	# print(SSR_np)
+
+	# df_organic_chem_tutor = pd.DataFrame(data_organic_chem_tutor)
+	# df_statquest = pd.DataFrame(data_statquest)
+
+	least_squares(df)
+
