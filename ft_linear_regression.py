@@ -22,7 +22,7 @@ expected m = 2.4142857142857146
 
 def plot_straight_line(orig_x, orig_y, x_values, y_values):
 	plt.scatter(orig_x, orig_y, color='red', label='original datapoints')
-	plt.scatter(x_values, y_values, color='blue', label='linear regression')
+	plt.plot(x_values, y_values, color='blue', label='linear regression')
 	plt.xlabel('km')
 	plt.ylabel('price')
 	plt.title('Linear regression')
@@ -49,7 +49,7 @@ def calculate_b_intercept(n, x_sum, y_sum, m):
 	return b
 
 
-
+#fitted line
 def calculate_least_squares_values(df):
 	n = df.shape[0]
 	xy = df['km'] * df['price']
@@ -92,7 +92,6 @@ def mean_squared_error(df, y_values):
 	return MSE
 
 
-
 def variation_around_the_mean_of_y(df, y_values):
 	mean_of_y = np.mean(df['price'])
 	return mean_of_y
@@ -110,14 +109,6 @@ def sum_of_squared_residuals_for_mean_np(df):
 
 def sum_of_squared_residuals_for_mean_df(df, mean):
 	SSR_for_mean = np.sum((df['price'] - mean)**2)
-	# SSR = 0
-	# for item0, item1, item2 in zip(df['km'], df['price'], y_values):
-	# 	# print(f'At km: {item0}: {item1} is orig, {item2} is the line')
-	# 	observed_min_predicted_value_squared = (item1 - item2)**2
-	# 	SSR += observed_min_predicted_value_squared
-	# 	print(f'The sum of squared residuals is : {SSR}')
-		#these are the actual differences for SSE
-	# this seems waaay to big. maybe we should normalize stuff?
 	return SSR_for_mean
 
 
@@ -164,7 +155,7 @@ def least_squares(df):
 	#what is y value of the original datapoint at coordinate x
 
 	# print(type(df['km']), type(y_values))
-	# plot_straight_line(df['km'].values, df['price'].values, x_values, y_values)
+	plot_straight_line(df['km'].values, df['price'].values, x_values, y_values)
 	# sum_of_squared_residuals(df, y_values)
 	# MSE = mean_squared_error(df, y_values)
 	# print(MSE)
@@ -206,6 +197,6 @@ if __name__ == "__main__":
 
 	# print(SSR_of_mean)
 	# create_graph_for_three(df)
-	# least_squares(df_test)
-	SSR_for_mean = sum_of_squared_residuals_for_mean_np(df_test)
-	print(SSR_for_mean)
+	least_squares(df)
+	# SSR_for_mean = sum_of_squared_residuals_for_mean_np(df_test)
+	# print(SSR_for_mean)
