@@ -1,26 +1,19 @@
-#!/opt/homebrew/bin/python3
+#!/Library/Frameworks/Python.framework/Versions/3.10/bin/python3
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
 '''
-#y = mx + b    -> in algebra
-#y = b0 + b1x  -> in statistics
-#b and b0 is the same
-#m and b1 is the same
-
-test values:
-
-n = 7
-x_sum = 28
-y_sum = 61.8
-xy_sum = 314.8
-x_squared_sum = 140
-
-expected m = 2.4142857142857146
+#!/opt/homebrew/bin/python3
 '''
 
+
 def plot_straight_line(orig_x, orig_y, x_values, y_values):
+	# print(f'{y_values} are y values')
+	# y_mean = np.mean(y_values)
+	# plt.plot(x_values, y_values, color='blue', label='linear regression')
+	# plt.plot([min(orig_x), max(orig_x)], [y_mean, y_mean], color='blue', label='linear regression')
+
 	plt.scatter(orig_x, orig_y, color='red', label='original datapoints')
 	plt.plot(x_values, y_values, color='blue', label='linear regression')
 	plt.xlabel('km')
@@ -32,24 +25,19 @@ def plot_straight_line(orig_x, orig_y, x_values, y_values):
 
 
 
-def calculate_slope(n, x_sum, y_sum, xy_sum, x_squared_sum):
-	m_nominator = (n * xy_sum) - (x_sum * y_sum)
-	m_denominator = (n * x_squared_sum) - (x_sum ** 2)
-	m = m_nominator / m_denominator
 
-	return m
+#calculate values for fitted line
+'''
 
+Test values:
 
+n = 7
+x_sum = 28
+y_sum = 61.8
+xy_sum = 314.8
+x_squared_sum = 140
 
-def calculate_b_intercept(n, x_sum, y_sum, m):
-	b_nominator = y_sum - (m * x_sum)
-	b_denominator = n
-	b = b_nominator / b_denominator
-
-	return b
-
-
-#fitted line
+'''
 def calculate_least_squares_values(df):
 	n = df.shape[0]
 	xy = df['km'] * df['price']
@@ -61,6 +49,47 @@ def calculate_least_squares_values(df):
 	x_squared_sum = x_squared.sum()
 
 	return n, x_sum, y_sum, xy_sum, x_squared_sum
+
+
+#in the subject, theta1 is m
+'''
+Test values for x,y to check if all calculates as expected
+
+x: 1,2,3,4,5,6,7
+y: 1.5, 3.8, 6.7, 9.0, 11.2, 13.6, 16
+expected slope m = 2.4142857
+
+#y = mx + b    -> in algebra
+#y = b0 + b1x  -> in statistics
+#b and b0 is the same
+#m and b1 is the same
+
+expected m = 2.4142857142857146
+'''
+def calculate_slope(n, x_sum, y_sum, xy_sum, x_squared_sum):
+	m_nominator = (n * xy_sum) - (x_sum * y_sum)
+	m_denominator = (n * x_squared_sum) - (x_sum ** 2)
+	m = m_nominator / m_denominator
+	print(f'returning slope of {m}')
+	return m
+
+
+#in the subject, theta0 is m
+'''
+https://www.youtube.com/watch?v=P8hT5nDai6A&ab_channel=TheOrganicChemistryTutor
+
+Based on the calculate slope test values:
+b = -0.828571
+
+'''
+def calculate_y_intercept(n, x_sum, y_sum, m):
+	b_nominator = y_sum - (m * x_sum)
+	b_denominator = n
+	b = b_nominator / b_denominator
+	print(f'returning y intercept of {b}')
+
+	return b
+
 
 
 
@@ -90,6 +119,8 @@ def mean_squared_error(df, y_values):
 	MSE = SSR / number_of_observations
 
 	return MSE
+
+
 
 
 def variation_around_the_mean_of_y(df, y_values):
@@ -138,23 +169,20 @@ def least_squares(df):
 	#we would like to find the slope for m
 	m = calculate_slope(n, x_sum, y_sum, xy_sum, x_squared_sum)
 	
-	#we would like to find b (y intercept) based on knowing m
-	b = calculate_b_intercept(n, x_sum, y_sum, m)
+	#we would like to find b (y intercept)
+	b = calculate_y_intercept(n, x_sum, y_sum, m)
 
+	#these are the values for the fitted line
 	x_values = df['km']
 	y_values = m * x_values + b
 
 	# frames = [df['price'], y_values]
-	df3 = pd.DataFrame({
-		"Original Price" : [df['price']],
-		"Straight line " : [y_values],
-	})
+	# df3 = pd.DataFrame({
+	# 	"Original Price" : [df['price']],
+	# 	"Straight line " : [y_values],
+	# })
 	calculate_R2(df, y_values)
 
-	#what is y value of the line at coordinate x
-	#what is y value of the original datapoint at coordinate x
-
-	# print(type(df['km']), type(y_values))
 	plot_straight_line(df['km'].values, df['price'].values, x_values, y_values)
 	# sum_of_squared_residuals(df, y_values)
 	# MSE = mean_squared_error(df, y_values)
@@ -194,9 +222,16 @@ if __name__ == "__main__":
 	# # print(f'{test_mean} is testmean')
 	# # print(f'{df_test["test_values"]} is testvalues')
 
+	
 
 	# print(SSR_of_mean)
 	# create_graph_for_three(df)
-	least_squares(df)
+	data_organic_chem_tutor = {
+		'km': [1,2,3,4,5,6,7],
+		'price': [1.5, 3.8, 6.7, 9.0, 11.2, 13.6, 16.0]}
+
+	
+	df_organic_chem_tutor = pd.DataFrame(data_organic_chem_tutor)
+	least_squares(df_organic_chem_tutor)
 	# SSR_for_mean = sum_of_squared_residuals_for_mean_np(df_test)
 	# print(SSR_for_mean)
