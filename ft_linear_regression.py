@@ -111,9 +111,9 @@ Correct method: (10-5)ˆ2 = 25 , (12-6)ˆ2 = 36
 Total : 25 + 36 = 61 / 2
 
 '''
-def mean_squared_error(df, y_values):
+def mean_squared_error(observed_y, predicted_y):
 	#this is essentially the SSR divided by the number of observations
-	SSR = sum_of_squared_residuals(df, y_values)
+	SSR = sum_of_squared_residuals(observed_y, predicted_y)
 	number_of_observations = len(df)
 	MSE = SSR / number_of_observations
 
@@ -130,8 +130,18 @@ def calculate_R2(observed_y, predicted_y_fitted, predicted_y_mean):
 	ssr_for_fitted_line = sum_of_squared_residuals(observed_y, predicted_y_fitted)
 	ssr_for_mean = sum_of_squared_residuals(observed_y, predicted_y_mean)
 
-	R2 = (ssr_for_fitted_line - ssr_for_mean) / ssr_for_mean
+	R2 = (ssr_for_mean - ssr_for_fitted_line) / ssr_for_mean
 	return R2
+
+
+#y values could be the mean values but also the y values of the fitted line
+def calculate_R2_with_MSE(observed_y, predicted_y_fitted, predicted_y_mean):
+	MSE_for_fitted_line = mean_squared_error(observed_y, predicted_y_fitted)
+	MSE_for_mean = mean_squared_error(observed_y, predicted_y_mean)
+
+	R2 = (MSE_for_mean - MSE_for_fitted_line) / MSE_for_mean
+	return R2
+
 
 
 '''
@@ -154,6 +164,7 @@ def calculate_R2(observed_y, predicted_y_fitted):
 https://www.youtube.com/watch?v=P6oIYmK4XdI
 When using sum of squared residuals we are using vertical distance instead of perpendicular
 '''
+#SSR
 def sum_of_squared_residuals(observed_y, predicted_y):
 	SSR = np.sum((observed_y -  predicted_y)**2)
 	return SSR
@@ -178,10 +189,19 @@ def least_squares(df):
 	array_mean_for_ssr = np.full(df.shape[0], mean_for_ssr)
 	observed_y = df['price'].values
 
-
 	R2 = calculate_R2(observed_y, y_values, array_mean_for_ssr)
-	print(R2)
+	R2_MSE = calculate_R2_with_MSE(observed_y, y_values, array_mean_for_ssr)
 
+	'''
+	R2 tells that approximately 0.7329 (73.29%)
+	of the variance in the car prices (independent variable (x)) can be explained by the variance in mileage (dependent variable y)
+	relatively high, indicates that the model fits the data well.
+	R² is very relevant in regression analysis
+	as it provides a measure of how well unseen samples are likely to be predicted by the model, 
+	under the assumption that the model assumptions hold true.
+	'''
+
+	# print(f'{R2} with simple R2, {R2_MSE} with MSE')
 
 
 def create_graph_for_three(df):
@@ -200,7 +220,8 @@ def create_graph_for_three(df):
 if __name__ == "__main__":
 
 	#maybe include guard in case of failure
-	df = pd.read_csv('datashort.csv')
+	# df = pd.read_csv('datashort.csv')
+	df = pd.read_csv('data.csv')
 	row, col = df.shape
 
 	data_np_row = df['km'].values

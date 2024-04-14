@@ -1,1 +1,5 @@
-#create a function for the 'fitted line' so we can use it for R2
+# calculate p values to make sure that this result isnt due to random chance
+# create prorgam1 and program2
+# create a version with gradient descent 
+# compare it with the analytical solution
+
