@@ -1,10 +1,12 @@
-#!/Library/Frameworks/Python.framework/Versions/3.10/bin/python3
+#!/opt/homebrew/bin/python3
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
 '''
 #!/opt/homebrew/bin/python3
+#!/Library/Frameworks/Python.framework/Versions/3.10/bin/python3
 '''
 
 
@@ -143,6 +145,27 @@ def calculate_R2_with_MSE(observed_y, predicted_y_fitted, predicted_y_mean):
 	return R2
 
 
+#calculate derivative respect to intercept
+def derivative_respect_to_theta0(mileage, price, theta0, theta1):
+	#m is amount of observation
+	result = np.sum(-2 * (mileage - (theta0 - theta1 * price)))
+	print(result)
+	return result
+
+
+
+def gradient_descent(mileage, price):
+	theta0 = 0 #intercept
+	theta1 = 0 #slope, influenced by mileage
+	learning_rate = 2e-1 #how much do we have to adjust theta
+	convergence_treshold = 2e-1 #0.2
+	# tmpTheta0 = learning_rate * (1/m) 
+	# print(f"{mileage[0]}, {mileage[1]}")
+	test = mileage[0] - (theta0 + theta1 * price[0])
+	print(test)
+	# derivative_of_theta0 = derivative_respect_to_theta0(mileage, price, theta0, theta1)
+	# print(derivative_of_theta0)
+
 
 '''
 
@@ -184,13 +207,16 @@ def least_squares(df):
 	x_values = df['km']
 	y_values = m * x_values + b
 
-	#preparing variables for ssr mean
-	mean_for_ssr = np.mean(df['price'])
-	array_mean_for_ssr = np.full(df.shape[0], mean_for_ssr)
-	observed_y = df['price'].values
+	gradient_descent(df['km'], df['price'])
 
-	R2 = calculate_R2(observed_y, y_values, array_mean_for_ssr)
-	R2_MSE = calculate_R2_with_MSE(observed_y, y_values, array_mean_for_ssr)
+
+	# #preparing variables for ssr mean
+	# mean_for_ssr = np.mean(df['price'])
+	# array_mean_for_ssr = np.full(df.shape[0], mean_for_ssr)
+	# observed_y = df['price'].values
+
+	# R2 = calculate_R2(observed_y, y_values, array_mean_for_ssr)
+	# R2_MSE = calculate_R2_with_MSE(observed_y, y_values, array_mean_for_ssr)
 
 	'''
 	R2 tells that approximately 0.7329 (73.29%)
@@ -221,7 +247,7 @@ if __name__ == "__main__":
 
 	#maybe include guard in case of failure
 	# df = pd.read_csv('datashort.csv')
-	df = pd.read_csv('data.csv')
+	df = pd.read_csv('datashort.csv')
 	row, col = df.shape
 
 	data_np_row = df['km'].values
