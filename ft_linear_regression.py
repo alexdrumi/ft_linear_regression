@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/python3
+#!/Library/Frameworks/Python.framework/Versions/3.10/bin/python3
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -24,8 +24,6 @@ def plot_straight_line(orig_x, orig_y, x_values, y_values):
 	plt.legend()
 	plt.grid(True)
 	plt.show()
-
-
 
 
 #calculate values for fitted line
@@ -145,29 +143,140 @@ def calculate_R2_with_MSE(observed_y, predicted_y_fitted, predicted_y_mean):
 	return R2
 
 
-#calculate derivative respect to intercept
-def derivative_respect_to_theta0(mileage, price, theta0, theta1):
-	#m is amount of observation
-	result = np.sum(-2 * (mileage - (theta0 - theta1 * price)))
-	print(result)
-	return result
+
+
+'''
+SSR = (observed_price - (intercept + 0.5 * observed_mileage)) ** 2
+
+
+derivative of SSR with respect to intercept:
+
+SSR = (observed_price - (intercept + 0.5 * observed_mileage))^2
+y = observed_price
+b = intercept
+x = observed_mileage
+
+SSR = (y - (b + 0.5x))^2
+
+h = y-(b+0.5x)
+h'(b) = -1
+#we need the derivative of h respect to b (intercept)
+#dh/db = d/db[y] - d/db[b+0.5x] = 0 + (-1 + 0) = -1
+
+g = h^2
+g'(h) = 2h
+
+g'(u) * h'(b) = 2u * -1
+= 2(y-(b+0.5x)) * -1
+= -2(y-(b+0.5x)) 
+
+dSSR/dIntercept = -2(observed_price-(intercept + 0.5 * observed_mileage))
+
+
+
+derivative of SSR with respect to slope:
+
+SSR = (y - (b + c*x))^2
+y = observed_price
+b = intercept
+x = observed_mileage
+c = slope
+
+h = y - (b + c*x)
+dh/dc = d/dc[y] - d/dc[b + cx] = 0 - (0 + x) = -x
+g = h^2
+g'(h) = 2h
+
+g'(u) * h'(b) = 2u * -x
+= 2(y-(b+c*x)) * -x
+= -2(y-(b+c*x)) * -x
+= -2x(y-(b+c*x))
+
+'''
+def derivative_SSR(mileage, price, intercept, slope):
+	y = price
+	x = mileage
+	b = intercept
+	c = slope
+
+	# print(mileage, price, intercept, slope)
+	h = y - (b + c * x)
+
+	#derivative of h respect to intercept 
+	dh_db = -1
+
+	#derivative of SSR respect to intercept, applying chain rule
+	dSSR_db = 2 * h * dh_db
+
+	#derivative of h respect to slope
+	dh_dc = -x
+
+	dSSR_dc = 2 * h * dh_dc
+
+	# print(type(dSSR_db), type(dSSR_dc))
+
+	# print(f'{dSSR_db} \n\n')
+	''' incorrect values for dSSR_db, not what expected. lets check tomorrow
+		>>> a = -2
+	>>> b = 3.2
+	>>> c = (0+0.5*2.9)
+	>>> a * (b - c)
+	-3.5000000000000004
+	>>> b = 1.9
+	>>> c = (0+0.5*2.3)
+	>>> a * (b - c)
+	-1.5
+	>>> b = 1.4
+	>>> c = (0+0.5*0.5)
+	>>> a * (b - c)
+	-2.3
+	>>> -3.5000000000000004 + (-1.5) + (-2.3)
+	-7.3
+	'''
+
+	#sum the derivatives across all data points, return it as a tuple
+	sum_derivatives_intercept = np.sum(dSSR_db)
+	sum_derivatives_slope = np.sum(dSSR_dc)
+
+	return (sum_derivatives_intercept, sum_derivatives_slope)
+	
+
+
 
 
 
 def gradient_descent(mileage, price):
+
+	# print(mileage, price)
 	theta0 = 0 #intercept
-	theta1 = 0 #slope, influenced by mileage
-	learning_rate = 2e-1 #how much do we have to adjust theta
-	convergence_treshold = 2e-1 #0.2
+	theta1 = 0.5 #slope, influenced by mileage
+	learning_rate = 1e-1 #how much do we have to adjust theta
+	convergence_treshold = 1e-3 #0.2
+
+	derivative_intercept, derivative_slope = derivative_SSR(mileage, price, theta0, theta1)
+
+	while (abs(derivative_intercept) > convergence_treshold and abs(derivative_slope) > convergence_treshold):
+		derivative_intercept, derivative_slope = derivative_SSR(mileage, price, theta0, theta1)
+
+		#update the parameters
+		theta0 -= learning_rate * derivative_intercept
+		theta1 -= learning_rate * derivative_slope
+
+	return theta0, theta1
+
 	# tmpTheta0 = learning_rate * (1/m) 
 	# print(f"{mileage[0]}, {mileage[1]}")
-	test = mileage[0] - (theta0 + theta1 * price[0])
-	print(test)
+	# test = mileage[0] - (theta0 + thetsa1 * price[0])
+
+	# print(derivative_intercept, derivative_slope)
+
+	# print(f' {mileage}, {price}')
+	# print(f'{type(mileage)} is mileage type, {type(price)} is price type')
 	# derivative_of_theta0 = derivative_respect_to_theta0(mileage, price, theta0, theta1)
 	# print(derivative_of_theta0)
 
 
-'''
+
 
 def calculate_R2(observed_y, predicted_y_fitted):
     # Calculate SSR
@@ -181,7 +290,6 @@ def calculate_R2(observed_y, predicted_y_fitted):
     R2 = 1 - (ssr / sst)
     return R2
 
-'''
 
 '''
 https://www.youtube.com/watch?v=P6oIYmK4XdI
@@ -207,8 +315,8 @@ def least_squares(df):
 	x_values = df['km']
 	y_values = m * x_values + b
 
-	gradient_descent(df['km'], df['price'])
-
+	theta0, theta1 = gradient_descent(df['km'], df['price'])
+	print(theta0, theta1)
 
 	# #preparing variables for ssr mean
 	# mean_for_ssr = np.mean(df['price'])
@@ -250,9 +358,14 @@ if __name__ == "__main__":
 	df = pd.read_csv('datashort.csv')
 	row, col = df.shape
 
+	test1 = np.array([3.2, 1.9, 1.4])
+	test2 = np.array([2.9, 2.3, 0.5])
+
 	data_np_row = df['km'].values
 	data_np_col = df['price'].values
 
+
+	ret = gradient_descent(test1, test2)
 	#practice dataset just like in the statquest book
 	df_test = np.array([2.3, 1.2, 2.7, 1.4, 2.2])
 	df_test_mean = df_test.mean()
@@ -281,5 +394,5 @@ if __name__ == "__main__":
 	# df_organic_chem_tutor = pd.DataFrame(data_organic_chem_tutor)
 	# df_statquest = pd.DataFrame(data_statquest)
 
-	least_squares(df)
+	# least_squares(df)
 
