@@ -258,8 +258,8 @@ The values are a bit tricky at the moment, they change too much. Not sure just y
 
 '''
 def gradient_descent(mileage, price):
-	theta0, theta1 = random_theta_initialization() #intercept and slope recpevtively
-	theta1 = 0 #slope, influenced by mileage
+	theta0, theta1 = random_theta_initialization() #intercept and slope respectively
+	# theta1 = 0.5 
 	learning_rate = 1e-3
 	convergence_treshold = 1e-4 #0.2
 	max_iterations = 10000
