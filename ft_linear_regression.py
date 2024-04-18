@@ -199,7 +199,9 @@ def derivative_SSR(mileage, price, intercept, slope):
 	b = intercept
 	c = slope
 
-	# print(mileage, price, intercept, slope)
+	# print(f'{price[0]} = price0, {b} = intercept, {mileage[0]} = mileage')
+	# print(-2 * (price[0] - (0 + b * mileage[0])))
+
 	h = y - (b + c * x)
 
 	#derivative of h respect to intercept 
@@ -216,23 +218,23 @@ def derivative_SSR(mileage, price, intercept, slope):
 	# print(type(dSSR_db), type(dSSR_dc))
 
 	# print(f'{dSSR_db} \n\n')
-	''' incorrect values for dSSR_db, not what expected. lets check tomorrow
-		>>> a = -2
-	>>> b = 3.2
-	>>> c = (0+0.5*2.9)
-	>>> a * (b - c)
-	-3.5000000000000004
-	>>> b = 1.9
-	>>> c = (0+0.5*2.3)
-	>>> a * (b - c)
-	-1.5
-	>>> b = 1.4
-	>>> c = (0+0.5*0.5)
-	>>> a * (b - c)
-	-2.3
-	>>> -3.5000000000000004 + (-1.5) + (-2.3)
-	-7.3
-	'''
+	# ''' incorrect values for dSSR_db, not what expected. lets check tomorrow
+	# 	>>> a = -2
+	# >>> b = 3.2
+	# >>> c = (0+0.5*2.9)
+	# >>> a * (b - c)
+	# -3.5000000000000004
+	# >>> b = 1.9
+	# >>> c = (0+0.5*2.3)
+	# >>> a * (b - c)
+	# -1.5
+	# >>> b = 1.4
+	# >>> c = (0+0.5*0.5)
+	# >>> a * (b - c)
+	# -2.3
+	# >>> -3.5000000000000004 + (-1.5) + (-2.3)
+	# -7.3
+	# '''
 
 	#sum the derivatives across all data points, return it as a tuple
 	sum_derivatives_intercept = np.sum(dSSR_db)
@@ -241,40 +243,58 @@ def derivative_SSR(mileage, price, intercept, slope):
 	return (sum_derivatives_intercept, sum_derivatives_slope)
 	
 
+#to avoid local minima early in the training
+def random_theta_initialization():
+	return np.random.rand(), np.random.rand()
 
 
+'''
 
+Convergence Check:
+The given examples use a norm or absolute difference check between the cost function evaluations from one iteration to the next. 
+For a linear regression, this would typically involve computing the MSE or another loss function,
+but the current setup seems to involve checking the parameter changes directly, could also work.
+The values are a bit tricky at the moment, they change too much. Not sure just yet why.
 
+'''
 def gradient_descent(mileage, price):
-
-	# print(mileage, price)
-	theta0 = 0 #intercept
-	theta1 = 0.5 #slope, influenced by mileage
-	learning_rate = 1e-1 #how much do we have to adjust theta
-	convergence_treshold = 1e-3 #0.2
+	theta0, theta1 = random_theta_initialization() #intercept and slope recpevtively
+	theta1 = 0 #slope, influenced by mileage
+	learning_rate = 1e-3
+	convergence_treshold = 1e-4 #0.2
+	max_iterations = 10000
 
 	derivative_intercept, derivative_slope = derivative_SSR(mileage, price, theta0, theta1)
-
-	while (abs(derivative_intercept) > convergence_treshold and abs(derivative_slope) > convergence_treshold):
+	theta0_prev, theta1_prev = theta0, theta1
+	# print(derivative_intercept * learning_rate_intercept, derivative_slope, convergence_treshold)
+	# print(f'{derivative_intercept}, {derivative_slope}')
+	while (max_iterations > 0):
 		derivative_intercept, derivative_slope = derivative_SSR(mileage, price, theta0, theta1)
 
-		#update the parameters
-		theta0 -= learning_rate * derivative_intercept
-		theta1 -= learning_rate * derivative_slope
+		step_size_intercept = derivative_intercept * learning_rate
+		step_size_slope = derivative_slope * learning_rate
+
+		# print(derivative_intercept, learning_rate_intercept)
+		theta0 = theta0_prev - step_size_intercept #gradient * stepsize
+		theta1 = theta1_prev -  step_size_slope #gradient * stepsize
+
+
+		theta1 = theta1_prev - step_size_slope
+
+		# Check for convergence based on parameter changes, this might be interesting
+		# if np.linalg.norm([theta0 - theta0_prev, theta1 - theta1_prev]) < convergence_threshold:
+		# break
+		#if both thetas succesfully achieved convergence, we stop iterating
+		if (abs(theta0 - theta0_prev) < convergence_treshold and abs(theta1 - theta1_prev) < convergence_treshold):
+			break 
+
+		#save prev values
+		theta0_prev = theta0
+		theta1_prev = theta1
+
+		max_iterations -= 1
 
 	return theta0, theta1
-
-	# tmpTheta0 = learning_rate * (1/m) 
-	# print(f"{mileage[0]}, {mileage[1]}")
-	# test = mileage[0] - (theta0 + thetsa1 * price[0])
-
-	# print(derivative_intercept, derivative_slope)
-
-	# print(f' {mileage}, {price}')
-	# print(f'{type(mileage)} is mileage type, {type(price)} is price type')
-	# derivative_of_theta0 = derivative_respect_to_theta0(mileage, price, theta0, theta1)
-	# print(derivative_of_theta0)
-
 
 
 
@@ -358,14 +378,15 @@ if __name__ == "__main__":
 	df = pd.read_csv('datashort.csv')
 	row, col = df.shape
 
-	test1 = np.array([3.2, 1.9, 1.4])
-	test2 = np.array([2.9, 2.3, 0.5])
+	test1 = np.array([2.9, 2.3, 0.5]) #wanna use this as mileage which is used for predicting price
+	test2 = np.array([3.2, 1.9, 1.4]) #these are the observed prices
 
 	data_np_row = df['km'].values
 	data_np_col = df['price'].values
 
 
 	ret = gradient_descent(test1, test2)
+	print(ret)
 	#practice dataset just like in the statquest book
 	df_test = np.array([2.3, 1.2, 2.7, 1.4, 2.2])
 	df_test_mean = df_test.mean()
