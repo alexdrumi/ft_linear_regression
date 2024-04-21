@@ -40,6 +40,7 @@ x_squared_sum = 140
 '''
 def calculate_least_squares_values(df):
 	n = df.shape[0]
+	# n = 3
 	xy = df['km'] * df['price']
 	x_squared = df['km'] * df['km']
 
@@ -192,13 +193,14 @@ g'(u) * h'(b) = 2u * -x
 = -2(y-(b+c*x)) * -x
 = -2x(y-(b+c*x))
 
+divide the whole thing with the amount of datapoints to get the MSE
 '''
-def derivative_SSR(mileage, price, intercept, slope):
+def derivative_MSE(mileage, price, intercept, slope):
 	y = price
 	x = mileage
 	b = intercept
 	c = slope
-
+	n = len(price)
 	# print(f'{price[0]} = price0, {b} = intercept, {mileage[0]} = mileage')
 	# print(-2 * (price[0] - (0 + b * mileage[0])))
 
@@ -208,12 +210,12 @@ def derivative_SSR(mileage, price, intercept, slope):
 	dh_db = -1
 
 	#derivative of SSR respect to intercept, applying chain rule
-	dSSR_db = 2 * h * dh_db
+	dMSE_db = 2 * h * dh_db / n
 
 	#derivative of h respect to slope
 	dh_dc = -x
 
-	dSSR_dc = 2 * h * dh_dc
+	dMSE_dc = 2 * h * dh_dc / n
 
 	# print(type(dSSR_db), type(dSSR_dc))
 
@@ -237,8 +239,8 @@ def derivative_SSR(mileage, price, intercept, slope):
 	# '''
 
 	#sum the derivatives across all data points, return it as a tuple
-	sum_derivatives_intercept = np.sum(dSSR_db)
-	sum_derivatives_slope = np.sum(dSSR_dc)
+	sum_derivatives_intercept = np.sum(dMSE_db)
+	sum_derivatives_slope = np.sum(dMSE_dc)
 
 	return (sum_derivatives_intercept, sum_derivatives_slope)
 	
@@ -257,35 +259,40 @@ but the current setup seems to involve checking the parameter changes directly, 
 The values are a bit tricky at the moment, they change too much. Not sure just yet why.
 
 '''
-def gradient_descent(mileage, price):
-	theta0, theta1 = random_theta_initialization() #intercept and slope respectively
+# def gradient_descent(mileage, pric:e):
+def gradient_descent(df):
+
+	mileage = np.array(df['km'])
+	price = np.array(df['price'])
+
+	# theta0, theta1 = random_theta_initialization() #intercept and slope respectively
 	# theta1 = 0.5 
+	theta0 = 0
+	theta1 = 0
 	learning_rate = 1e-3
-	convergence_treshold = 1e-4 #0.2
+	convergence_threshold = 1e-4 #0.001
 	max_iterations = 10000
 
-	derivative_intercept, derivative_slope = derivative_SSR(mileage, price, theta0, theta1)
+	derivative_intercept, derivative_slope = derivative_MSE(mileage, price, theta0, theta1)
+	# print(f'{derivative_intercept} is the derivative respect to intercept,\n {derivative_slope} is the derivative respect to slope')
 	theta0_prev, theta1_prev = theta0, theta1
-	# print(derivative_intercept * learning_rate_intercept, derivative_slope, convergence_treshold)
+	# print(derivative_intercept * learning_rate_intercept, derivative_slope, convergence_threshold)
 	# print(f'{derivative_intercept}, {derivative_slope}')
 	while (max_iterations > 0):
-		derivative_intercept, derivative_slope = derivative_SSR(mileage, price, theta0, theta1)
+		derivative_intercept, derivative_slope = derivative_MSE(mileage, price, theta0, theta1)
 
 		step_size_intercept = derivative_intercept * learning_rate
 		step_size_slope = derivative_slope * learning_rate
 
 		# print(derivative_intercept, learning_rate_intercept)
 		theta0 = theta0_prev - step_size_intercept #gradient * stepsize
-		theta1 = theta1_prev -  step_size_slope #gradient * stepsize
-
-
-		theta1 = theta1_prev - step_size_slope
+		theta1 = theta1_prev - step_size_slope #gradient * stepsize
 
 		# Check for convergence based on parameter changes, this might be interesting
 		# if np.linalg.norm([theta0 - theta0_prev, theta1 - theta1_prev]) < convergence_threshold:
-		# break
+		# 	break
 		#if both thetas succesfully achieved convergence, we stop iterating
-		if (abs(theta0 - theta0_prev) < convergence_treshold and abs(theta1 - theta1_prev) < convergence_treshold):
+		if (abs(theta0 - theta0_prev) < convergence_threshold and abs(theta1 - theta1_prev) < convergence_threshold):
 			break 
 
 		#save prev values
@@ -299,16 +306,16 @@ def gradient_descent(mileage, price):
 
 
 def calculate_R2(observed_y, predicted_y_fitted):
-    # Calculate SSR
-    ssr = sum_of_squared_residuals(observed_y, predicted_y_fitted)
+	# Calculate SSR
+	ssr = sum_of_squared_residuals(observed_y, predicted_y_fitted)
 
-    # Calculate SST
-    mean_y = np.mean(observed_y)
-    sst = np.sum((observed_y - mean_y)**2)
+	# Calculate SST
+	mean_y = np.mean(observed_y)
+	sst = np.sum((observed_y - mean_y)**2)
 
-    # Calculate R^2
-    R2 = 1 - (ssr / sst)
-    return R2
+	# Calculate R^2
+	R2 = 1 - (ssr / sst)
+	return R2
 
 
 '''
@@ -335,8 +342,49 @@ def least_squares(df):
 	x_values = df['km']
 	y_values = m * x_values + b
 
-	theta0, theta1 = gradient_descent(df['km'], df['price'])
-	print(theta0, theta1)
+	# # Plotting the original data points
+	# plt.scatter(df['km'], df['price'], color='blue', label='Data Points')
+
+	# # Plotting the regression line
+	# plt.plot(x_values, y_values, color='red', label='Fitted Line')
+
+	# # Adding labels and legend
+	# plt.xlabel('Kilometers')
+	# plt.ylabel('Price')
+	# plt.title('Linear Regression Fit')
+	# plt.legend()
+
+	# # Display the plot
+	# plt.show()
+	theta0, theta1 = gradient_descent(df)
+
+	# Generate a range of mileage values for plotting
+	x_range = np.linspace(df['km'].min(), df['km'].max(), 100)
+
+	# Predicted values from least squares
+	y_least_squares = m * x_range + b
+
+	# Predicted values from gradient descent
+	y_gradient_descent = theta1 * x_range + theta0
+
+	plt.figure(figsize=(10, 6))
+
+	# Plot actual data points
+	plt.scatter(df['km'], df['price'], color='blue', label='Actual Data')
+
+	# Plot least squares regression line
+	plt.plot(x_range, y_least_squares, 'r-', label='Least Squares Regression Line')
+
+	# Plot gradient descent regression line
+	plt.plot(x_range, y_gradient_descent, 'g--', label='Gradient Descent Regression Line')
+
+	plt.title('Comparison of Regression Methods')
+	plt.xlabel('Mileage (km)')
+	plt.ylabel('Price ($)')
+	plt.legend()
+	plt.grid(True)
+	plt.show()
+
 
 	# #preparing variables for ssr mean
 	# mean_for_ssr = np.mean(df['price'])
@@ -357,6 +405,31 @@ def least_squares(df):
 
 	# print(f'{R2} with simple R2, {R2_MSE} with MSE')
 
+# def compare_methods(df):
+#     # Calculate with least squares
+#     n, x_sum, y_sum, xy_sum, x_squared_sum = calculate_least_squares_values(df)
+#     m = calculate_slope(n, x_sum, y_sum, xy_sum, x_squared_sum)
+#     b = calculate_y_intercept(n, x_sum, y_sum, m)
+
+#     # Calculate with gradient descent
+#     theta0_gd, theta1_gd = gradient_descent(df['km'], df['price'])
+
+#     print(f"Least Squares results: m = {m}, b = {b}")
+#     print(f"Gradient Descent results: theta1 = {theta1_gd}, theta0 = {theta0_gd}")
+
+#     # Optionally, calculate differences
+#     diff_slope = abs(m - theta1_gd)
+#     diff_intercept = abs(b - theta0_gd)
+#     print(f"Difference in slope: {diff_slope}, Difference in intercept: {diff_intercept}")
+
+def min_max_normalize(array):
+	x_min = np.min(array)
+	x_max = np.max(array)
+
+	array_normalized = (array - x_min)/(x_max - x_min)
+	return array_normalized
+
+
 
 def create_graph_for_three(df):
 	data_np_row_three = df['km'].head(3).values
@@ -375,7 +448,7 @@ if __name__ == "__main__":
 
 	#maybe include guard in case of failure
 	# df = pd.read_csv('datashort.csv')
-	df = pd.read_csv('datashort.csv')
+	df = pd.read_csv('data.csv')
 	row, col = df.shape
 
 	test1 = np.array([2.9, 2.3, 0.5]) #wanna use this as mileage which is used for predicting price
@@ -385,8 +458,10 @@ if __name__ == "__main__":
 	data_np_col = df['price'].values
 
 
-	ret = gradient_descent(test1, test2)
-	print(ret)
+	# ret = gradient_descent(test1, test2)
+	# print(ret)
+
+	# compare_methods(df)
 	#practice dataset just like in the statquest book
 	df_test = np.array([2.3, 1.2, 2.7, 1.4, 2.2])
 	df_test_mean = df_test.mean()
@@ -402,18 +477,27 @@ if __name__ == "__main__":
 
 
 	# data_statquest = {
-	# 	'km': [1,2,3,4,5],
-	# 	'price': [2.3, 1.2, 2.7, 1.4, 2.2]
+	# 	'km': [2.9, 2.3, 0.5],
+	# 	'price': [3.2, 1.9, 1.4]
 	# }
 
-	# test data from statquest book	
-	# observed_y = np.array([1.2, 2.2, 1.4, 2.7, 2.3])
-	# predicted_y = np.array([1.1, 1.8, 1.9, 2.4, 2.5])
-	# SSR_np = np.sum((observed_y - predicted_y)**2)
-	# print(SSR_np)
+	# df = pd.DataFrame(data_statquest)
 
 	# df_organic_chem_tutor = pd.DataFrame(data_organic_chem_tutor)
 	# df_statquest = pd.DataFrame(data_statquest)
+	# ret = gradient_descent(data_statquest)
+	# print(ret)
 
-	# least_squares(df)
+	#normalize the data
+
+	mileage_normalized = min_max_normalize(df['km'].values)
+	price_normalized = min_max_normalize(df['price'].values)
+
+	normalized_df = pd.DataFrame({
+		'km': mileage_normalized,
+		'price': price_normalized
+	})
+
+	# print(normalized_df)
+	least_squares(normalized_df)
 
