@@ -210,12 +210,12 @@ def derivative_MSE(mileage, price, intercept, slope):
 	dh_db = -1
 
 	#derivative of SSR respect to intercept, applying chain rule
-	dMSE_db = 2 * h * dh_db / n
+	dMSE_db = (2 * h * dh_db) / n
 
 	#derivative of h respect to slope
 	dh_dc = -x
 
-	dMSE_dc = 2 * h * dh_dc / n
+	dMSE_dc = (2 * h * dh_dc) / n
 
 	# print(type(dSSR_db), type(dSSR_dc))
 
@@ -270,14 +270,29 @@ def gradient_descent(df):
 	theta0 = 0
 	theta1 = 0
 	learning_rate = 1e-3
-	convergence_threshold = 1e-4 #0.001
+	convergence_threshold = 1e-8 #0.001
 	max_iterations = 10000
 
 	derivative_intercept, derivative_slope = derivative_MSE(mileage, price, theta0, theta1)
-	# print(f'{derivative_intercept} is the derivative respect to intercept,\n {derivative_slope} is the derivative respect to slope')
 	theta0_prev, theta1_prev = theta0, theta1
-	# print(derivative_intercept * learning_rate_intercept, derivative_slope, convergence_threshold)
-	# print(f'{derivative_intercept}, {derivative_slope}')
+
+	# theta1_values = np.linspace(-0.1, 0.1, 100)
+	# theta0_values = np.linspace(-2000, 2000, 100)
+	# Theta1, Theta0 = np.meshgrid(theta1_values, theta0_values)
+
+	# # Compute MSE for each combination of theta0 and theta1
+	# MSE = np.array([np.mean((theta0 + theta1 * df['km'] - df['price'])**2) for theta0, theta1 in zip(np.ravel(Theta0), np.ravel(Theta1))])
+	# MSE = MSE.reshape(Theta0.shape)
+
+	# # Plot the MSE surface
+	# plt.figure(figsize=(10, 8))
+	# cp = plt.contourf(Theta1, Theta0, MSE, levels=np.logspace(0, 5, 35), cmap='viridis')
+	# plt.colorbar(cp)
+	# plt.title('MSE Loss Surface')
+	# plt.xlabel('Theta1 (slope)')
+	# plt.ylabel('Theta0 (intercept)')
+
+
 	while (max_iterations > 0):
 		derivative_intercept, derivative_slope = derivative_MSE(mileage, price, theta0, theta1)
 
@@ -300,6 +315,9 @@ def gradient_descent(df):
 		theta1_prev = theta1
 
 		max_iterations -= 1
+	# 	plt.scatter(theta1, theta0, color='red')  # Plot current theta values
+
+	# plt.show()
 
 	return theta0, theta1
 
@@ -357,6 +375,8 @@ def least_squares(df):
 	# # Display the plot
 	# plt.show()
 	theta0, theta1 = gradient_descent(df)
+
+
 
 	# Generate a range of mileage values for plotting
 	x_range = np.linspace(df['km'].min(), df['km'].max(), 100)
@@ -457,8 +477,12 @@ if __name__ == "__main__":
 	data_np_row = df['km'].values
 	data_np_col = df['price'].values
 
+	test_df = pd.DataFrame({
+		'km': test1,
+		'price': test2
+	})
 
-	# ret = gradient_descent(test1, test2)
+	# ret = gradient_descent(test_df)
 	# print(ret)
 
 	# compare_methods(df)
