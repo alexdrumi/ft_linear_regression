@@ -1,4 +1,4 @@
-#!/Library/Frameworks/Python.framework/Versions/3.10/bin/python3
+#!/opt/homebrew/bin/python3
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -268,10 +268,13 @@ def gradient_descent(df):
 	# theta0, theta1 = random_theta_initialization() #intercept and slope respectively
 	# theta1 = 0.5 
 	theta0, theta1 = 0, 0
-	learning_rate = 0.007 #with smaller learning rate, the adjustments are also smaller thus the max_iteration has to be raised
-	convergence_threshold = 1e-9
-	max_iterations = 5000
-	#with smaller learning rate this becomes a bit more precise
+	learning_rate = 0.01 #with smaller learning rate, the adjustments are also smaller thus the max_iteration has to be raised
+	#if you change this for instance 0.1, it will barely iterate but will not be as precise
+	convergence_threshold = 1e-6
+	max_iterations = 6000
+	#with smaller learning rate this becomes a bit more precise but max_iterations have to be raised
+	least_squares_intercept = 0.9393189294497466
+	least_squares_slope = -1.003575742397017
 
 	derivative_intercept, derivative_slope = derivative_MSE(mileage, price, theta0, theta1)
 	theta0_prev, theta1_prev = theta0, theta1
@@ -291,7 +294,14 @@ def gradient_descent(df):
 	# plt.title('MSE Loss Surface')
 	# plt.xlabel('Theta1 (slope)')
 	# plt.ylabel('Theta0 (intercept)')
+ 
+	# Fast Convergence: If the MSE drops quickly and flattens out, it suggests that the learning rate is effectively tuned.
+	# Slow Convergence or Non-Convergence: If the MSE decreases very slowly or oscillates, consider adjusting the learning rate or increasing the iteration count.
 
+
+	mse_history = []
+	mse_history.append(0)
+	initial_treshold = 0.0001
 	while (max_iterations > 0):
 		derivative_intercept, derivative_slope = derivative_MSE(mileage, price, theta0, theta1)
 
@@ -302,13 +312,27 @@ def gradient_descent(df):
 		theta0 = theta0_prev - step_size_intercept #gradient * stepsize
 		theta1 = theta1_prev - step_size_slope #gradient * stepsize
 
+		#mse to monitor
+		mse_current = np.mean((price - (theta0 + theta1 * mileage))**2)
+		mse_history.append(mse_current)
+
+		# print(f'{mse_history[-2]} previous, {mse_history[-1]} current\n')
 		# Check for convergence based on parameter changes, this might be interesting
 		# if np.linalg.norm([theta0 - theta0_prev, theta1 - theta1_prev]) < convergence_threshold:
 		# 	break
 		#if both thetas succesfully achieved convergence, we stop iterating
-		if (abs(step_size_intercept) < convergence_threshold and abs(step_size_slope) < convergence_threshold):
+		if (max_iterations != 6000 and abs(mse_history[-2] - mse_history[-1]) < initial_treshold):
+			print('breaking because MSE didnt change much')
 			break 
-
+		# decay the treshold over time with 1%
+		initial_treshold *= 0.99
+		if (abs(step_size_intercept) < convergence_threshold and abs(step_size_slope) < convergence_threshold):
+			print('we reached the convergence treshold')
+			break 
+		if (theta0 >= least_squares_intercept and theta1 <= least_squares_slope):
+			break 
+		
+		print(f'{theta0} compared to {least_squares_intercept} and {theta1} compared to {least_squares_slope}\n')
 		#save prev values
 		theta0_prev = theta0
 		theta1_prev = theta1
@@ -356,6 +380,7 @@ def least_squares(df):
 	#we would like to find b (y intercept)
 	b = calculate_y_intercept(n, x_sum, y_sum, m)
 
+	print(f'{m} is slope, {b} is intercept')
 	#these are the values for the fitted line
 	x_values = df['km']
 	y_values = m * x_values + b
@@ -387,23 +412,23 @@ def least_squares(df):
 	# Predicted values from gradient descent
 	y_gradient_descent = theta1 * x_range + theta0
 
-	plt.figure(figsize=(10, 6))
+	# plt.figure(figsize=(10, 6))
 
-	# Plot actual data points
-	plt.scatter(df['km'], df['price'], color='blue', label='Actual Data')
+	# # Plot actual data points
+	# plt.scatter(df['km'], df['price'], color='blue', label='Actual Data')
 
-	# Plot least squares regression line
-	plt.plot(x_range, y_least_squares, 'r-', label='Least Squares Regression Line')
+	# # Plot least squares regression line
+	# plt.plot(x_range, y_least_squares, 'r-', label='Least Squares Regression Line')
 
-	# Plot gradient descent regression line
-	plt.plot(x_range, y_gradient_descent, 'g--', label='Gradient Descent Regression Line')
+	# # Plot gradient descent regression line
+	# plt.plot(x_range, y_gradient_descent, 'g--', label='Gradient Descent Regression Line')
 
-	plt.title('Comparison of Regression Methods')
-	plt.xlabel('Mileage (km)')
-	plt.ylabel('Price ($)')
-	plt.legend()
-	plt.grid(True)
-	plt.show()
+	# plt.title('Comparison of Regression Methods')
+	# plt.xlabel('Mileage (km)')
+	# plt.ylabel('Price ($)')
+	# plt.legend()
+	# plt.grid(True)
+	# plt.show()
 
 
 	# #preparing variables for ssr mean
