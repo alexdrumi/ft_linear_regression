@@ -210,12 +210,12 @@ def derivative_MSE(mileage, price, intercept, slope):
 	dh_db = -1
 
 	#derivative of SSR respect to intercept, applying chain rule
-	dMSE_db = (2 * h * dh_db) / n
+	dMSE_db = (2/n) * np.sum(h * dh_db)
 
 	#derivative of h respect to slope
 	dh_dc = -x
 
-	dMSE_dc = (2 * h * dh_dc) / n
+	dMSE_dc = (2/n) * np.sum(h * dh_dc)
 
 	# print(type(dSSR_db), type(dSSR_dc))
 
@@ -239,10 +239,10 @@ def derivative_MSE(mileage, price, intercept, slope):
 	# '''
 
 	#sum the derivatives across all data points, return it as a tuple
-	sum_derivatives_intercept = np.sum(dMSE_db)
-	sum_derivatives_slope = np.sum(dMSE_dc)
+	# sum_derivatives_intercept = np.sum(dMSE_db)
+	# sum_derivatives_slope = np.sum(dMSE_dc)
 
-	return (sum_derivatives_intercept, sum_derivatives_slope)
+	return (dMSE_db, dMSE_dc)
 	
 
 #to avoid local minima early in the training
@@ -261,17 +261,17 @@ The values are a bit tricky at the moment, they change too much. Not sure just y
 '''
 # def gradient_descent(mileage, pric:e):
 def gradient_descent(df):
-
+	#0.9392969779416096 -1.0035178010925934 should be end result
 	mileage = np.array(df['km'])
 	price = np.array(df['price'])
 
 	# theta0, theta1 = random_theta_initialization() #intercept and slope respectively
 	# theta1 = 0.5 
-	theta0 = 0
-	theta1 = 0
-	learning_rate = 1e-3
-	convergence_threshold = 1e-8 #0.001
-	max_iterations = 10000
+	theta0, theta1 = 0, 0
+	learning_rate = 0.007 #with smaller learning rate, the adjustments are also smaller thus the max_iteration has to be raised
+	convergence_threshold = 1e-9
+	max_iterations = 5000
+	#with smaller learning rate this becomes a bit more precise
 
 	derivative_intercept, derivative_slope = derivative_MSE(mileage, price, theta0, theta1)
 	theta0_prev, theta1_prev = theta0, theta1
@@ -292,12 +292,11 @@ def gradient_descent(df):
 	# plt.xlabel('Theta1 (slope)')
 	# plt.ylabel('Theta0 (intercept)')
 
-
 	while (max_iterations > 0):
 		derivative_intercept, derivative_slope = derivative_MSE(mileage, price, theta0, theta1)
 
-		step_size_intercept = derivative_intercept * learning_rate
-		step_size_slope = derivative_slope * learning_rate
+		step_size_intercept = learning_rate * derivative_intercept
+		step_size_slope = learning_rate * derivative_slope 
 
 		# print(derivative_intercept, learning_rate_intercept)
 		theta0 = theta0_prev - step_size_intercept #gradient * stepsize
@@ -307,13 +306,14 @@ def gradient_descent(df):
 		# if np.linalg.norm([theta0 - theta0_prev, theta1 - theta1_prev]) < convergence_threshold:
 		# 	break
 		#if both thetas succesfully achieved convergence, we stop iterating
-		if (abs(theta0 - theta0_prev) < convergence_threshold and abs(theta1 - theta1_prev) < convergence_threshold):
+		if (abs(step_size_intercept) < convergence_threshold and abs(step_size_slope) < convergence_threshold):
 			break 
 
 		#save prev values
 		theta0_prev = theta0
 		theta1_prev = theta1
 
+		print(theta0_prev, theta1_prev, max_iterations)
 		max_iterations -= 1
 	# 	plt.scatter(theta1, theta0, color='red')  # Plot current theta values
 
