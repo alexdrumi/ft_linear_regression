@@ -269,7 +269,7 @@ def gradient_descent(df):
 	# theta1 = 0.5 
 	theta0, theta1 = 0, 0
 	learning_rate = 0.01 #with smaller learning rate, the adjustments are also smaller thus the max_iteration has to be raised
-	#if you change this for instance 0.1, it will barely iterate but will not be as precise
+	#if you change this for instance 0.1, it will barely iterate but will not be precise
 	convergence_threshold = 1e-6
 	max_iterations = 6000
 	#with smaller learning rate this becomes a bit more precise but max_iterations have to be raised
