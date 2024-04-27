@@ -36,11 +36,16 @@ class LinearRegression:
 		self.derivative_slope = 0
 
 		#data
-		self.mileage = self.min_max_normalize(df['km'].values)
-		self.price = self.min_max_normalize(df['price'].values)
+		self.mileage = self.min_max_normalize(self.df['km'].values)
+		self.price = self.min_max_normalize(self.df['price'].values)
+
+		#mse history
+		self.mse_history = []
+		self.mse_history.append(0)
 
 
-
+#b ->intercept
+#c ->slope
 	def derivative_MSE(self):
 		y = self.price
 		x = self.mileage
@@ -73,8 +78,7 @@ class LinearRegression:
 		self.derivative_intercept, self.derivative_slope = self.derivative_MSE()
 		self.theta0_prev, self.theta1_prev = self.theta0, self.theta1
 
-		mse_history = []
-		mse_history.append(0)
+		
 		while (self.max_iterations > 0):
 			self.derivative_intercept, self.derivative_slope = self.derivative_MSE()
 
@@ -84,10 +88,10 @@ class LinearRegression:
 			self.theta0 = self.theta0_prev - step_size_intercept
 			self.theta1 = self.theta1_prev - step_size_slope
 
-			mse_current = np.mean((self.price - (self.theta0 + self.theta1 * self.mileage))**2)
-			mse_history.append(mse_current)
+			self.mse_current = np.mean((self.price - (self.theta0 + self.theta1 * self.mileage))**2)
+			self.mse_history.append(self.mse_current)
 
-			if (self.max_iterations != 6000 and abs(mse_history[-2] - mse_history[-1]) < self.initial_treshold):
+			if (self.max_iterations != 6000 and abs(self.mse_history[-2] - self.mse_history[-1]) < self.initial_treshold):
 				print('breaking because MSE didnt change much')
 				break 
 			self.initial_treshold *= 0.99
@@ -108,7 +112,7 @@ class LinearRegression:
 		plt.figure(figsize=(10, 6))
 
 		# plot actual data points
-		plt.scatter(self.mileage, self.price, color='blue', label='Actual Data')
+		plt.scatter(self.mileage, self.price, color='navy', label='Actual Data', marker='o')
 
 		x_range = np.linspace(self.mileage.min(), self.mileage.max(), 100)
 
@@ -118,11 +122,11 @@ class LinearRegression:
 		# plot gradient descent regression line
 		y_gradient_descent = self.theta1 * x_range + self.theta0
 
-		plt.plot(x_range, y_gradient_descent, 'g--', label='Gradient Descent Regression Line')
+		plt.plot(x_range, y_gradient_descent, 'g--', linewidth=2, label='Gradient Descent Regression Line')
 		plt.title('Linear regression with Gradient Descent')
-		plt.xlabel('Mileage (km)')
-		plt.ylabel('Price ($)')
-		plt.legend()
+		plt.xlabel('Mileage (km)', fontsize=14)
+		plt.ylabel('Price ($)', fontsize=14)
+		plt.legend(loc='upper left', fontsize=12)
 		plt.grid(True)
 		plt.show()
 
@@ -141,9 +145,9 @@ if __name__ == '__main__':
 	df = pd.read_csv('data.csv')
 	row, col = df.shape
 
-
 	linear_regression_instance = LinearRegression(df)
 
 	result = linear_regression_instance.gradient_descent(df)
+	print(result)
 	linear_regression_instance.plot_linear_regression()
 
