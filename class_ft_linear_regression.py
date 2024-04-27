@@ -18,14 +18,6 @@ class LinearRegression:
 	def __init__(self, df):
 		self.df = df
 
-		# mileage_normalized = min_max_normalize(df['km'].values)
-		# price_normalized = min_max_normalize(df['price'].values)
-
-		# normalized_df = pd.DataFrame({
-		# 	'km': mileage_normalized,
-		# 	'price': price_normalized
-		# })
-
 		#intercept and slope
 		self.theta0 = 0
 		self.theta1 = 0
@@ -49,66 +41,6 @@ class LinearRegression:
 
 
 
-
-	def calculate_least_squares_values(self, df):
-		n = df.shape[0]
-		xy = df['km'] * df['price']
-		x_squared = df['km'] * df['km']
-
-		x_sum = df['km'].sum()
-		y_sum = df['price'].sum()
-		xy_sum = xy.sum()
-		x_squared_sum = x_squared.sum()
-
-		return n, x_sum, y_sum, xy_sum, x_squared_sum
-
-
-
-	def calculate_slope(self, n, x_sum, y_sum, xy_sum, x_squared_sum):
-		m_nominator = (n * xy_sum) - (x_sum * y_sum)
-		m_denominator = (n * x_squared_sum) - (x_sum ** 2)
-		m = m_nominator / m_denominator
-
-		return m
-
-
-
-	def calculate_y_intercept(self, n, x_sum, y_sum, m):
-		b_nominator = y_sum - (m * x_sum)
-		b_denominator = n
-		b = b_nominator / b_denominator
-		
-		return b
-
-
-
-	def least_squares(self, df):
-		n, x_sum, y_sum, xy_sum, x_squared_sum = self.calculate_least_squares_values(df)
-		
-		#we would like to find the slope for m
-		m = self.calculate_slope(n, x_sum, y_sum, xy_sum, x_squared_sum)
-		
-		#we would like to find b (y intercept)
-		b = self.calculate_y_intercept(n, x_sum, y_sum, m)
-
-		print(f'{m} is slope, {b} is intercept')
-		#these are the values for the fitted line
-		x_values = df['km']
-		y_values = m * x_values + b
-
-		theta0, theta1 = self.gradient_descent(df)
-
-		# Generate a range of mileage values for plotting
-		x_range = np.linspace(df['km'].min(), df['km'].max(), 100)
-
-		# Predicted values from least squares
-		y_least_squares = m * x_range + b
-
-		# Predicted values from gradient descent
-		y_gradient_descent = theta1 * x_range + theta0
-
-
-
 	def derivative_MSE(self):
 		y = self.price
 		x = self.mileage
@@ -126,6 +58,7 @@ class LinearRegression:
 		return (dMSE_db, dMSE_dc)
 	
 
+
 	def min_max_normalize(self, array):
 		x_min = np.min(array)
 		x_max = np.max(array)
@@ -134,18 +67,15 @@ class LinearRegression:
 		return array_normalized
 
 
-	def gradient_descent(self, df):
-		learning_rate = 0.01
-		convergence_threshold = 1e-6
-		max_iterations = 6000
 
+	def gradient_descent(self, df):
+		
 		self.derivative_intercept, self.derivative_slope = self.derivative_MSE()
 		self.theta0_prev, self.theta1_prev = self.theta0, self.theta1
 
 		mse_history = []
 		mse_history.append(0)
-		initial_treshold = 0.0001
-		while (max_iterations > 0):
+		while (self.max_iterations > 0):
 			self.derivative_intercept, self.derivative_slope = self.derivative_MSE()
 
 			step_size_intercept = self.learning_rate * self.derivative_intercept
@@ -160,23 +90,44 @@ class LinearRegression:
 			if (self.max_iterations != 6000 and abs(mse_history[-2] - mse_history[-1]) < self.initial_treshold):
 				print('breaking because MSE didnt change much')
 				break 
-			initial_treshold *= 0.99
-			if (abs(step_size_intercept) < convergence_threshold and abs(step_size_slope) < convergence_threshold):
+			self.initial_treshold *= 0.99
+			if (abs(step_size_intercept) < self.convergence_threshold and abs(step_size_slope) < self.convergence_threshold):
 				print('we reached the convergence treshold')
 				break 
-			# if (theta0 >= least_squares_intercept and theta1 <= least_squares_slope):
-			# 	break 
-			
-			# print(f'{theta0} compared to {least_squares_intercept} and {theta1} compared to {least_squares_slope}\n')
-			print(f'{theta0} compared to and {theta1} compared to \n')
-
-			theta0_prev = theta0
-			theta1_prev = theta1
-
-			max_iterations -= 1
 		
-		return theta0, theta1
+			self.theta0_prev = self.theta0
+			self.theta1_prev = self.theta1
 
+			self.max_iterations -= 1
+		
+		return self.theta0, self.theta1
+
+
+
+	def plot_linear_regression(self):
+		plt.figure(figsize=(10, 6))
+
+		# plot actual data points
+		plt.scatter(self.mileage, self.price, color='blue', label='Actual Data')
+
+		x_range = np.linspace(self.mileage.min(), self.mileage.max(), 100)
+
+		# Plot least squares regression line
+		# plt.plot(x_range, y_least_squares, 'r-', label='Least Squares Regression Line')
+
+		# plot gradient descent regression line
+		y_gradient_descent = self.theta1 * x_range + self.theta0
+
+		plt.plot(x_range, y_gradient_descent, 'g--', label='Gradient Descent Regression Line')
+		plt.title('Linear regression with Gradient Descent')
+		plt.xlabel('Mileage (km)')
+		plt.ylabel('Price ($)')
+		plt.legend()
+		plt.grid(True)
+		plt.show()
+
+
+	
 
 
 def signal_handler():
@@ -191,18 +142,8 @@ if __name__ == '__main__':
 	row, col = df.shape
 
 
-
 	linear_regression_instance = LinearRegression(df)
 
 	result = linear_regression_instance.gradient_descent(df)
-	print(result)
-	# mileage_normalized = min_max_normalize(df['km'].values)
-	# price_normalized = min_max_normalize(df['price'].values)
-
-	# normalized_df = pd.DataFrame({
-	# 	'km': mileage_normalized,
-	# 	'price': price_normalized
-	# })
-
-	# theta1, theta2 = self.gradient_descent(normalized_df)
+	linear_regression_instance.plot_linear_regression()
 

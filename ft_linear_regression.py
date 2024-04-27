@@ -412,23 +412,23 @@ def least_squares(df):
 	# Predicted values from gradient descent
 	y_gradient_descent = theta1 * x_range + theta0
 
-	# plt.figure(figsize=(10, 6))
+	plt.figure(figsize=(10, 6))
 
-	# # Plot actual data points
-	# plt.scatter(df['km'], df['price'], color='blue', label='Actual Data')
+	# Plot actual data points
+	plt.scatter(df['km'], df['price'], color='blue', label='Actual Data')
 
-	# # Plot least squares regression line
-	# plt.plot(x_range, y_least_squares, 'r-', label='Least Squares Regression Line')
+	# Plot least squares regression line
+	plt.plot(x_range, y_least_squares, 'r-', label='Least Squares Regression Line')
 
-	# # Plot gradient descent regression line
-	# plt.plot(x_range, y_gradient_descent, 'g--', label='Gradient Descent Regression Line')
+	# Plot gradient descent regression line
+	plt.plot(x_range, y_gradient_descent, 'g--', label='Gradient Descent Regression Line')
 
-	# plt.title('Comparison of Regression Methods')
-	# plt.xlabel('Mileage (km)')
-	# plt.ylabel('Price ($)')
-	# plt.legend()
-	# plt.grid(True)
-	# plt.show()
+	plt.title('Comparison of Regression Methods')
+	plt.xlabel('Mileage (km)')
+	plt.ylabel('Price ($)')
+	plt.legend()
+	plt.grid(True)
+	plt.show()
 
 
 	# #preparing variables for ssr mean
