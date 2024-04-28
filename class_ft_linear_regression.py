@@ -28,6 +28,8 @@ class LinearRegression:
 		self.iterations = 0
 		self.max_iterations = 6000
 		self.initial_treshold = 0.0001 # decay the treshold over time with 1%
+		self.step_size_intercept = 0
+		self.step_size_slope = 0
 
 		#derivatives
 		self.derivative_intercept = 0
@@ -40,6 +42,13 @@ class LinearRegression:
 		#mse history
 		self.mse_history = []
 		self.mse_history.append(0)
+
+
+
+	def compute_MSE(self):
+		prediction = self.theta1 * self.mileage + self.theta0
+		MSE = np.mean((self.price - (prediction) **2))
+		return MSE
 
 
 #b ->intercept
@@ -80,21 +89,18 @@ class LinearRegression:
 		while (self.max_iterations > 0):
 			self.derivative_intercept, self.derivative_slope = self.derivative_MSE()
 
-			step_size_intercept = self.learning_rate * self.derivative_intercept
-			step_size_slope = self.learning_rate * self.derivative_slope 
+			self.step_size_intercept = self.learning_rate * self.derivative_intercept
+			self.step_size_slope = self.learning_rate * self.derivative_slope 
 
-			self.theta0 = self.theta0_prev - step_size_intercept
-			self.theta1 = self.theta1_prev - step_size_slope
+			self.theta0 -= self.step_size_intercept
+			self.theta1 -= self.step_size_slope
 
-			self.mse_current = np.mean((self.price - (self.theta0 + self.theta1 * self.mileage))**2)
-			self.mse_history.append(self.mse_current)
-
-			if (self.max_iterations != 6000 and abs(self.mse_history[-2] - self.mse_history[-1]) < self.initial_treshold):
-				print('breaking because MSE didnt change much')
-				break 
-			self.initial_treshold *= 0.99
-			if (abs(step_size_intercept) < self.convergence_threshold and abs(step_size_slope) < self.convergence_threshold):
-				print('we reached the convergence treshold')
+			mse_current = self.compute_MSE()
+			self.mse_history.append(mse_current)
+			#we can use this for logging and monitoring how MSE behaves
+	
+			if (abs(self.step_size_intercept) < self.convergence_threshold and abs(self.step_size_slope) < self.convergence_threshold):
+				print('We have reached the convergence treshold.')
 				break 
 		
 			self.theta0_prev = self.theta0
@@ -138,10 +144,10 @@ class LinearRegression:
 
 
 
-def signal_handler():
+def signal_handler(signum, frame):
+	signame = signal.Signals(signum).name
+	print(f'Signal handler called with signal {signame} ({signum}), exciting program.')
 	sys.exit(0)
-
-
 
 
 
@@ -154,5 +160,5 @@ if __name__ == '__main__':
 	linear_regression_instance = LinearRegression(df)
 
 	result = linear_regression_instance.gradient_descent(df)
-	# linear_regression_instance.plot_linear_regression()
+	linear_regression_instance.plot_linear_regression()
 	linear_regression_instance.save_thetas(result)
