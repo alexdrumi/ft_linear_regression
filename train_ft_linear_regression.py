@@ -99,7 +99,7 @@ class LinearRegression:
 			self.mse_history.append(mse_current)
 			#we can use this for logging and monitoring how MSE behaves
 	
-			if (abs(self.step_size_intercept) < self.convergence_threshold and abs(self.step_size_slope) < self.convergence_threshold):
+			if (self.convergence_succeeded() is True):
 				print('We have reached the convergence treshold.')
 				break 
 		
@@ -109,6 +109,12 @@ class LinearRegression:
 			self.max_iterations -= 1
 		
 		return self.theta0, self.theta1
+
+
+
+	def	convergence_succeeded(self):
+		return (abs(self.step_size_intercept) < self.convergence_threshold 
+				and abs(self.step_size_slope) < self.convergence_threshold)
 
 
 
