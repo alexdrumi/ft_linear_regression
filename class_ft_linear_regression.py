@@ -13,7 +13,7 @@ import signal
 
 class LinearRegression:
 
-	def __init__(self):
+	def __init__(self, df):
 		self.df = None
 		self.filename = 'data.csv'
 
@@ -37,8 +37,8 @@ class LinearRegression:
 		self.derivative_slope = 0
 
 		#data
-		self.mileage = 0 #self.min_max_normalize(self.df['km'].values)
-		self.price = 0 #self.min_max_normalize(self.df['price'].values)
+		self.mileage = self.min_max_normalize(self.df['km'].values)
+		self.price = self.min_max_normalize(self.df['price'].values)
 
 		#mse history
 		self.mse_history = []
@@ -72,7 +72,7 @@ class LinearRegression:
 	
 
 
-	def gradient_descent(self):
+	def gradient_descent(self, df):
 		
 		self.derivative_intercept, self.derivative_slope = self.derivative_MSE()
 		self.theta0_prev, self.theta1_prev = self.theta0, self.theta1
@@ -149,13 +149,7 @@ class LinearRegression:
 			df = pd.read_csv(self.filename)
 			self.df = df
 		except (FileNotFoundError, PermissionError, IOError) as e:
-			self.handle_file_error(e)
-
-
-
-	def assign_mileage_and_price(self):
-		self.mileage = self.min_max_normalize(self.df['km'].values)
-		self.price = self.min_max_normalize(self.df['price'].values)
+            self.handle_file_error(e)
 
 
 
@@ -193,11 +187,8 @@ if __name__ == '__main__':
 	# df = pd.read_csv('data.csv')
 	# row, col = df.shape
 
-	linear_regression_instance = LinearRegression()
+	linear_regression_instance = LinearRegression(df)
 	linear_regression_instance.read_csv()
-	linear_regression_instance.assign_mileage_and_price()
-
-	result = linear_regression_instance.gradient_descent()
-	
+	result = linear_regression_instance.gradient_descent(df)
 	linear_regression_instance.plot_linear_regression()
 	linear_regression_instance.save_thetas(result)
