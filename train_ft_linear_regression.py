@@ -156,7 +156,7 @@ class LinearRegression:
 	def assign_mileage_and_price(self):
 		self.mileage = self.min_max_normalize(self.df['km'].values)
 		self.price = self.min_max_normalize(self.df['price'].values)
-
+		return 
 
 
 	def handle_file_error(self, error):
