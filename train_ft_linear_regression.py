@@ -1,4 +1,4 @@
-#!/Library/Frameworks/Python.framework/Versions/3.10/bin/python3
+#!/opt/homebrew/bin/python3
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -87,8 +87,9 @@ class LinearRegression:
 			self.theta0 -= self.step_size_intercept
 			self.theta1 -= self.step_size_slope
 
-			mse_current = self.compute_MSE()
-			self.mse_history.append(mse_current)
+			if (self.max_iterations % 100 == 0):
+				mse_current = self.compute_MSE()
+				self.mse_history.append(mse_current)
 			#we can use this for logging and monitoring how MSE behaves
 	
 			if (self.convergence_succeeded() is True):
@@ -141,6 +142,24 @@ class LinearRegression:
 		plt.legend(loc='upper left', fontsize=12)
 		plt.grid(True)
 		plt.show()
+
+
+
+	def plot_mse_history(self):
+		#take a look how many mse parts do we have?
+		plt.figure(figsize=(10, 6))
+
+		n = len(self.mse_history)
+		iterations = range(0, len(self.mse_history) * 100, 100)
+		plt.plot(iterations, self.mse_history, 'r-', linewidth=2, label='MSE per 100 Iterations')  # Changed to a red line
+		plt.yscale('log')  # Logarithmic scale to show the curve
+		plt.title('MSE History')
+		plt.xlabel('Iterations', fontsize=14)
+		plt.ylabel('MSE', fontsize=14)
+		plt.legend(loc='upper right', fontsize=12)
+		plt.grid(True)
+		plt.show()
+
 
 
 
@@ -201,3 +220,5 @@ if __name__ == '__main__':
 	
 	linear_regression_instance.plot_linear_regression()
 	linear_regression_instance.save_thetas(result)
+
+	linear_regression_instance.plot_mse_history()
