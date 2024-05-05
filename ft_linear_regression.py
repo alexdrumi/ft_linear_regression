@@ -195,7 +195,7 @@ g'(u) * h'(b) = 2u * -x
 
 divide the whole thing with the amount of datapoints to get the MSE
 '''
-def derivative_MSE(mileage, price, intercept, slope):
+def compute_MSE_gradients(mileage, price, intercept, slope):
 	y = price
 	x = mileage
 	b = intercept
@@ -276,7 +276,7 @@ def gradient_descent(df):
 	least_squares_intercept = 0.9393189294497466
 	least_squares_slope = -1.003575742397017
 
-	derivative_intercept, derivative_slope = derivative_MSE(mileage, price, theta0, theta1)
+	derivative_intercept, derivative_slope = compute_MSE_gradients(mileage, price, theta0, theta1)
 	theta0_prev, theta1_prev = theta0, theta1
 
 	# theta1_values = np.linspace(-0.1, 0.1, 100)
@@ -303,7 +303,7 @@ def gradient_descent(df):
 	mse_history.append(0)
 	initial_treshold = 0.0001
 	while (max_iterations > 0):
-		derivative_intercept, derivative_slope = derivative_MSE(mileage, price, theta0, theta1)
+		derivative_intercept, derivative_slope = compute_MSE_gradients(mileage, price, theta0, theta1)
 
 		step_size_intercept = learning_rate * derivative_intercept
 		step_size_slope = learning_rate * derivative_slope 

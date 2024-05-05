@@ -37,8 +37,8 @@ class LinearRegression:
 		self.derivative_slope = 0
 
 		#data
-		self.mileage = 0 #self.min_max_normalize(self.df['km'].values)
-		self.price = 0 #self.min_max_normalize(self.df['price'].values)
+		self.mileage = 0
+		self.price = 0
 
 		#mse history
 		self.mse_history = []
@@ -54,7 +54,7 @@ class LinearRegression:
 
 	#b ->intercept
 	#c ->slope
-	def derivative_MSE(self):
+	def compute_MSE_gradients(self):
 		y = self.price
 		x = self.mileage
 		b = self.theta0
@@ -74,12 +74,9 @@ class LinearRegression:
 
 	def gradient_descent(self):
 		
-		self.derivative_intercept, self.derivative_slope = self.derivative_MSE()
-		self.theta0_prev, self.theta1_prev = self.theta0, self.theta1
-
-		
-		while (self.max_iterations > 0):
-			self.derivative_intercept, self.derivative_slope = self.derivative_MSE()
+		initial_treshold = 0.0001
+		while (self.iterations < self.max_iterations):
+			self.derivative_intercept, self.derivative_slope = self.compute_MSE_gradients()
 
 			self.step_size_intercept = self.learning_rate * self.derivative_intercept
 			self.step_size_slope = self.learning_rate * self.derivative_slope 
@@ -90,6 +87,11 @@ class LinearRegression:
 			if (self.max_iterations % 100 == 0):
 				mse_current = self.compute_MSE()
 				self.mse_history.append(mse_current)
+				
+			if (self.iterations != 0 and abs(self.mse_history[-2] - self.mse_history[-1]) < initial_treshold):
+				print('breaking because MSE didnt change much')
+				break 
+			initial_treshold *= 0.99
 			#we can use this for logging and monitoring how MSE behaves
 	
 			if (self.convergence_succeeded() is True):
@@ -99,7 +101,7 @@ class LinearRegression:
 			self.theta0_prev = self.theta0
 			self.theta1_prev = self.theta1
 
-			self.max_iterations -= 1
+			self.iterations += 1
 		
 		return self.theta0, self.theta1
 

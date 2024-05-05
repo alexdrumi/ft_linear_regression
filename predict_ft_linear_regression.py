@@ -1,4 +1,4 @@
-#!/Library/Frameworks/Python.framework/Versions/3.10/bin/python3
+#!/opt/homebrew/bin/python3
 
 #read thetas from file
 #predict a given value from the terminal
@@ -32,7 +32,7 @@ Predicts the price based on mileage using the trained thetas and min/max values 
 def predict_price(mileage, theta0, theta1, min_km, max_km, min_price, max_price):
 	normalized_mileage = min_max_normalize(mileage, min_km, max_km)
 	# Predict price in normalized scale
-	normalized_price = theta0 + theta1 * normalized_mileage
+	normalized_price = theta1 * normalized_mileage + theta0
 	# Convert normalized price back to dollar price
 	price_in_dollars = normalized_price * (max_price - min_price) + min_price
 	return price_in_dollars
