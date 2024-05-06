@@ -1,4 +1,4 @@
-#!/Library/Frameworks/Python.framework/Versions/3.10/bin/python3
+#!/opt/homebrew/bin/python3
 
 import matplotlib.pyplot as plt
 import pandas as pd

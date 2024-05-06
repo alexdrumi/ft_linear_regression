@@ -38,8 +38,6 @@ def predict_price(mileage, theta0, theta1, min_km, max_km, min_price, max_price)
 	return price_in_dollars
 
 
-
-
 if __name__ == '__main__':
 	# Load thetas
 	# read mileage arguiments from the command line

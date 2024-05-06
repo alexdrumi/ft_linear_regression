@@ -44,7 +44,18 @@ class LinearRegression:
 		return np.mean((self.price - predictions) ** 2)
 
 
-		
+
+	def compute_RMSE(self):
+		return np.sqrt(self.compute_MSE())
+
+
+
+	def compute_MAE(self):
+		predictions = self.theta0 + self.theta1 * self.mileage
+		mae = np.mean(np.abs(self.price - predictions))
+		return mae
+
+
 	'''
 	------------------------------------------------------------------------------
 	The following is calculating the derivatives respect to slope and intercept
@@ -138,8 +149,8 @@ class LinearRegression:
 	def min_max_normalize(self, array):
 		x_min = np.min(array)
 		x_max = np.max(array)
-
 		array_normalized = (array - x_min)/(x_max - x_min)
+
 		return array_normalized
 
 
@@ -178,3 +189,4 @@ class LinearRegression:
 			self.iterations += 1
 		
 		return self.theta0, self.theta1
+

@@ -7,8 +7,6 @@ from linear_regression import LinearRegression
 
 
  
-
-
 	# def plot_linear_regression(self):
 	# 	plt.figure(figsize=(10, 6))
 
@@ -46,28 +44,28 @@ from linear_regression import LinearRegression
 	# 	plt.grid(True)
 	# 	plt.show()
 
-	def assign_mileage_and_price(self):
+def assign_mileage_and_price(self):
 		self.mileage = self.min_max_normalize(self.df['km'].values)
 		self.price = self.min_max_normalize(self.df['price'].values)
 
 
-	def read_csv(self):
-		try:
-			df = pd.read_csv(self.filename)
-			self.df = df
-		except (FileNotFoundError, PermissionError, IOError) as e:
-			self.handle_file_error(e)
+def read_csv(self):
+	try:
+		df = pd.read_csv(self.filename)
+		self.df = df
+	except (FileNotFoundError, PermissionError, IOError) as e:
+		self.handle_file_error(e)
 
 
-	def handle_file_error(self, error):
+def handle_file_error(self, error):
 
-		if isinstance(error, FileNotFoundError):
-			print(f'File not found: {self.filename}')
-		elif isinstance(error, PermissionError):
-			print(f'Permission denied while trying to open the file: {self.filename}')
-		else:
-			print(f'I/O error occured while reading the file: {self.filename}')
-			print(f'Error details: {error}')
+	if isinstance(error, FileNotFoundError):
+		print(f'File not found: {self.filename}')
+	elif isinstance(error, PermissionError):
+		print(f'Permission denied while trying to open the file: {self.filename}')
+	else:
+		print(f'I/O error occured while reading the file: {self.filename}')
+		print(f'Error details: {error}')
 
 
 def check_data_validity(df):
@@ -90,17 +88,13 @@ def main():
 	linear_regression_instance.plot_mse_history()
 
 
-	def save_thetas(self, thetas):
-		with open('thetas.txt', 'w') as file:
-			print(f'{thetas[0]}, {thetas[1]}')
-			file.write(str(thetas[0]) + "\n")
-			file.write(str(thetas[1]) + "\n")
-		file.close()
+def save_thetas(self, thetas):
+	with open('thetas.txt', 'w') as file:
+		print(f'{thetas[0]}, {thetas[1]}')
+		file.write(str(thetas[0]) + "\n")
+		file.write(str(thetas[1]) + "\n")
+	file.close()
 	
-
-
-
-
 
 
 def signal_handler(signum, frame):
@@ -112,15 +106,15 @@ def signal_handler(signum, frame):
 
 if __name__ == '__main__':
 	signal.signal(signal.SIGINT, signal_handler)
+	main()
+	# linear_regression_instance = LinearRegression()
+	# linear_regression_instance.read_csv()
+	# linear_regression_instance.assign_mileage_and_price()
 
-	linear_regression_instance = LinearRegression()
-	linear_regression_instance.read_csv()
-	linear_regression_instance.assign_mileage_and_price()
-
-	result = linear_regression_instance.gradient_descent()
+	# result = linear_regression_instance.gradient_descent()
 	
-	linear_regression_instance.plot_linear_regression()
-	linear_regression_instance.save_thetas(result)
+	# linear_regression_instance.plot_linear_regression()
+	# linear_regression_instance.save_thetas(result)
 
-	linear_regression_instance.plot_mse_history()
+	# linear_regression_instance.plot_mse_history()
 
