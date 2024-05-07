@@ -5,7 +5,7 @@ import csv
 
 
 
-class Parse:
+class ParseRegression:
 
 	def __init__(self):
 		self.filename = 'data.csv'
@@ -103,17 +103,3 @@ class Parse:
 	def save_datasets(self):
 		self.train_data.to_csv(self.train_data_name, index=False)
 		self.test_data.to_csv(self.test_data_name, index=False)
-
-
-
-
-def main():
-	parse_instance = Parse()
-	parse_instance.read_csv()
-	parse_instance.split_dataset()
-	parse_instance.save_datasets()
-
-
-if __name__ == '__main__':
-	main()
-
