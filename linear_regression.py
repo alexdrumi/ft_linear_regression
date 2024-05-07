@@ -13,7 +13,7 @@ class LinearRegression:
 
 	def __init__(self,learning_rate=1e-2, convergence_treshold=1e-6, max_iterations=6000):
 		self.df = None
-		self.filename = 'data.csv'
+		self.filename = 'training_data.csv'
 
 		self.theta0 = 0 #intercept
 		self.theta1 = 0 #slope
