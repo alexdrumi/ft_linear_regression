@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 import csv
-
+import argparse
 
 
 class ParseRegression:
@@ -83,7 +83,6 @@ class ParseRegression:
 			print(f"Percentage for training data: {self.train_percentage}%")
 			print(f"Percentage for evaluation data: {self.test_percentage}%")
 
-		#call another function which splits it into the given percentages
 		self.split_to_given_percentages()
 
 
@@ -103,3 +102,4 @@ class ParseRegression:
 	def save_datasets(self):
 		self.train_data.to_csv(self.train_data_name, index=False)
 		self.test_data.to_csv(self.test_data_name, index=False)
+

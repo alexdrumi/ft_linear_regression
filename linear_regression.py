@@ -3,7 +3,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
+import sys
 '''
 #!/opt/homebrew/bin/python3
 #!/Library/Frameworks/Python.framework/Versions/3.10/bin/python3
@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 class LinearRegression:
 
-	def __init__(self,learning_rate=1e-2, convergence_treshold=1e-6, max_iterations=6000):
+	def __init__(self, learning_rate, convergence_treshold, max_iterations=8000):
 		self.df = None
 		self.filename = 'training_data.csv'
 
@@ -23,7 +23,7 @@ class LinearRegression:
 		self.convergence_threshold = convergence_treshold
 		self.max_iterations = max_iterations
 		self.iterations = 0
-		self.initial_treshold = 0.0001
+		# self.initial_treshold = 0.0001 originally for dynamic decay
 
 		#gradients
 		self.derivative_intercept = 0
@@ -151,14 +151,14 @@ class LinearRegression:
 	# 	h = y - (b + c * x)
 
 	# 	#derivative of h respect to intercept
-	# 	# dh_db = -1
-	# 	#derivative of SSR respect to intercept, applying chain rule (this is 1/m in the subject)
-	# 	# dMSE_db = (2/n) * np.sum(h * dh_db)
+	# 	dh_db = -1
+	# 	# derivative of SSR respect to intercept, applying chain rule (this is 1/m in the subject)
+	# 	dMSE_db = (2/n) * np.sum(h * dh_db)
   
-	# 	#derivative of h respect to slope
-	# 	#dh_dc = -x
-	# 	#derivative of SSR respect to slope, applying chain rule, divided by n (this is 1/m in the subject)
-	#	# dMSE_dc = (2/n) * np.sum(h * dh_dc)
+	# 	# derivative of h respect to slope
+	# 	dh_dc = -x
+	# 	# derivative of SSR respect to slope, applying chain rule, divided by n (this is 1/m in the subject)
+	# 	dMSE_dc = (2/n) * np.sum(h * dh_dc)
 	# 	return (dMSE_db, dMSE_dc)
 
 	def compute_MSE_gradients(self):
@@ -184,15 +184,19 @@ class LinearRegression:
 
 
 	def convergence_succeeded(self):
-		return (abs(self.step_size_intercept) < self.convergence_threshold 
-			and abs(self.step_size_slope) < self.convergence_threshold)
+		print(f"{abs(self.step_size_intercept)} is step_size_intercept\n{abs(self.step_size_slope)} is step_size_slope\n")
+		intercept_converged = abs(self.step_size_intercept) < self.convergence_threshold
+		slope_converged = abs(self.step_size_slope) < self.convergence_threshold
+		
+		result = intercept_converged and slope_converged
+		# print(f'{result} is from the convergence')
+		return result
 
 
 
 	def log_MSE(self):
 		mse_current = self.compute_MSE()
 		self.mse_history.append(mse_current)
-
 
 
 
@@ -221,7 +225,8 @@ class LinearRegression:
 			if self.max_iterations % 100 == 0:
 				self.log_MSE()
 
-			if self.convergence_succeeded() is True:
+			if self.convergence_succeeded() == True:
+				print('True from the loop convergence\n')
 				break
 
 			self.iterations += 1
@@ -266,3 +271,16 @@ class LinearRegression:
 		plt.legend(loc='upper right', fontsize=12)
 		plt.grid(True)
 		plt.show()
+
+
+
+	def print_to_terminal(self):
+		print(f"\033[92mTraining Update:"
+			f"\n\033[92mIterations it took to train: \033[97m{self.iterations}"
+			f"\n\033[92mLearning Rate: \033[97m{self.learning_rate}"
+			f"\n\033[92mMax Iterations: \033[97m{self.max_iterations}"
+			f"\n\033[92mConvergence Threshold: \033[97m{self.convergence_threshold}"
+			f"\n\033[92mTheta0 (Intercept): \033[97m{self.theta0}"
+			f"\n\033[92mTheta1 (Slope): \033[97m{self.theta1}"
+			f"\n\033[92mMSE: \033[97m{self.compute_MSE()}"
+			f"\n\033[92mRMSE: \033[97m{self.compute_RMSE()}")
