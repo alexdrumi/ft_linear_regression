@@ -1,0 +1,36 @@
+
+a possible folder structure to implement
+
+
+```
+ft_linear_regression/
+│
+├── data/                    
+│   ├── data.csv
+│   ├── testing_data.csv
+│   └── training_data.csv
+│
+├── src/                       #srcs
+│   ├── __init__.py            #maybe init a python package, not necessary
+│   ├── command_line_parser.py
+│   ├── dataset_processor.py
+│   ├── linear_regression.py
+│   ├── plot_regression.py
+│   └── predict_ft_linear_regression.py
+│
+├── tests/                     #eventually tests with values which are known to be correct, we can use least_squares calculation as well as a proper value
+│   ├── __init__.py            #package init
+│   ├── test_linear_regression.py
+│   └── test_dataset_processor.py
+│
+├── outputs/                   #generated output of the model
+│   └── thetas.txt
+│
+├── scripts/                   #main scripts to run the program
+│   ├── train_linear_regression.py
+│   └── predict_linear_regression.py
+│
+├── requirements.txt           #dependencies, not necessary here prob
+├── README.md                  #documentation
+└── .gitignore                 #usual
+```

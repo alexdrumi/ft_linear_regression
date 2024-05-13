@@ -1,9 +1,11 @@
-#!/opt/homebrew/bin/python3
-
+#!/Library/Frameworks/Python.framework/Versions/3.10/bin/python3
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+
+
+
 '''
 #!/opt/homebrew/bin/python3
 #!/Library/Frameworks/Python.framework/Versions/3.10/bin/python3
@@ -23,7 +25,6 @@ class LinearRegression:
 		self.convergence_threshold = convergence_treshold
 		self.max_iterations = max_iterations
 		self.iterations = 0
-		# self.initial_treshold = 0.0001 originally for dynamic decay
 
 		#gradients
 		self.derivative_intercept = 0
@@ -86,7 +87,7 @@ class LinearRegression:
 
 	'''
 	------------------------------------------------------------------------------
-	The following is calculating the derivatives respect to slope and intercept
+	The following is calculating the partial derivatives respect to slope and intercept
 	------------------------------------------------------------------------------
 
 
@@ -184,12 +185,10 @@ class LinearRegression:
 
 
 	def convergence_succeeded(self):
-		print(f"{abs(self.step_size_intercept)} is step_size_intercept\n{abs(self.step_size_slope)} is step_size_slope\n")
 		intercept_converged = abs(self.step_size_intercept) < self.convergence_threshold
 		slope_converged = abs(self.step_size_slope) < self.convergence_threshold
-		
 		result = intercept_converged and slope_converged
-		# print(f'{result} is from the convergence')
+
 		return result
 
 
@@ -209,8 +208,26 @@ class LinearRegression:
 
 
 
+	def load_thetas(self):
+		with open('thetas.txt', 'r') as file:
+			theta0 = float(file.readline().strip())
+			theta1 = float(file.readline().strip())
+		return theta0, theta1
+
+
+
+	def predict_price(self, mileage, theta0, theta1, min_km, max_km, min_price, max_price):
+		normalized_mileage = self.min_max_normalize(mileage)
+		# Predict price in normalized scale
+		normalized_price = theta1 * normalized_mileage + theta0
+		# Convert normalized price back to dollar price
+		price_in_dollars = normalized_price * (max_price - min_price) + min_price
+		return price_in_dollars
+
+
+
 	'''
-	Take a look at RMSprop, Adam, or incorporating learning rate schedules.
+	Take a look at RMSprop, Adam, or incorporating learning rate schedules later.
 	'''
 	def gradient_descent(self):
 		while (self.iterations < self.max_iterations):
@@ -226,51 +243,11 @@ class LinearRegression:
 				self.log_MSE()
 
 			if self.convergence_succeeded() == True:
-				print('True from the loop convergence\n')
 				break
 
 			self.iterations += 1
 		
 		return self.theta0, self.theta1
-
-
-
-	def plot_linear_regression(self):
-		plt.figure(figsize=(10, 6))
-
-		plt.scatter(self.mileage, self.price, color='navy', label='Actual Data', marker='o')
-
-		x_range = np.linspace(self.mileage.min(), self.mileage.max(), 100)
-
-		# Plot least squares regression line
-		# plt.plot(x_range, y_least_squares, 'r-', label='Least Squares Regression Line')
-
-		# plot gradient descent regression line
-		y_gradient_descent = self.theta1 * x_range + self.theta0
-
-		plt.plot(x_range, y_gradient_descent, 'g--', linewidth=2, label='Gradient Descent Regression Line')
-		plt.title('Linear regression with Gradient Descent')
-		plt.xlabel('Mileage (km)', fontsize=14)
-		plt.ylabel('Price ($)', fontsize=14)
-		plt.legend(loc='upper left', fontsize=12)
-		plt.grid(True)
-		plt.show()
-
-
-	def plot_mse_history(self):
-		#take a look how many mse parts do we have?
-		plt.figure(figsize=(10, 6))
-
-		n = len(self.mse_history)
-		iterations = range(0, len(self.mse_history) * 100, 100)
-		plt.plot(iterations, self.mse_history, 'r-', linewidth=2, label='MSE per 100 Iterations')  # Changed to a red line
-		plt.yscale('log')  # Logarithmic scale to show the curve
-		plt.title('MSE History')
-		plt.xlabel('Iterations', fontsize=14)
-		plt.ylabel('MSE', fontsize=14)
-		plt.legend(loc='upper right', fontsize=12)
-		plt.grid(True)
-		plt.show()
 
 
 

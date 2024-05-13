@@ -3,26 +3,26 @@ import pandas as pd
 import numpy as np
 import csv
 import argparse
+import logging
 
-
-class ParseRegression:
-
-	def __init__(self):
-		self.filename = 'data.csv'
-		self.train_data_name = 'training_data.csv'
-		self.test_data_name = 'testing_data.csv'
+class DatasetProcessor:
+	"""
+	Manages the processing of datasets for machine learning purposes, handling
+	tasks such as reading CSV data, checking validity, splitting into training
+	and testing sets, and saving those datasets.
+	"""
+	def __init__(self, train_percentage, test_percentage, filename='data.csv', train_data_name='training_data.csv', test_data_name='testing_data.csv'):
+		"""
+		Initializes the DatasetProcessor with the path to the dataset and the split percentages.
+		"""
+		self.filename = filename
+		self.train_data_name = train_data_name
+		self.test_data_name = test_data_name
 		self.train_data = None
 		self.test_data = None
 		self.df = None
-		self.df_len = 0
-		self.train_percentage = 100
-		self.test_percentage = 0
-
-
-
-	def assign_mileage_and_price(self):
-		self.mileage = self.min_max_normalize(self.df['km'].values)
-		self.price = self.min_max_normalize(self.df['price'].values)
+		self.train_percentage = train_percentage
+		self.test_percentage = test_percentage
 
 
 
@@ -32,7 +32,7 @@ class ParseRegression:
 			self.check_data_validity(df)
 			self.df = df
 			self.df_len = len(df['km'])
-		except (FileNotFoundError, PermissionError, IOError, pd.errors.EmptyDataError:) as e:
+		except (FileNotFoundError, PermissionError, IOError, pd.errors.EmptyDataError) as e:
 			self.handle_file_error(e)
 
 # 
@@ -60,25 +60,11 @@ class ParseRegression:
 
 
 
-	def get_percentage(self, prompt):
-		while True:
-			try:
-				percentage = float(input(prompt))
-				if 0 <= percentage <= 100:
-					return percentage
-				else:
-					print("Percentage must be between 0 and 100.")
-			except ValueError:
-				print("Invalid input. Please enter a valid percentage.")
-
-
-
 	def split_dataset(self, train_percentage, test_percentage):
-		total_percentage = 100
-		self.train_percentage = self.get_percentage("\n\nEnter the percentage for training data; \nSuggested values are: 80% for training, 20% for evaluating: ")
-		self.test_percentage = self.get_percentage("Enter the percentage for evaluation data: ")
+		if self.df is None:
+			raise ValueError("Dataframe is empty. Make sure to read data first.")
 		
-		#check if the sum of percentages exceeds 100
+		total_percentage = 100
 		if self.train_percentage + self.test_percentage > total_percentage:
 			print("The sum of percentages cannot exceed 100%. Please try again.")
 			self.split_dataset()
