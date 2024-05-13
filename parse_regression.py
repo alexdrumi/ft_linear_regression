@@ -32,7 +32,7 @@ class ParseRegression:
 			self.check_data_validity(df)
 			self.df = df
 			self.df_len = len(df['km'])
-		except (FileNotFoundError, PermissionError, IOError) as e:
+		except (FileNotFoundError, PermissionError, IOError, pd.errors.EmptyDataError:) as e:
 			self.handle_file_error(e)
 
 # 
@@ -43,6 +43,9 @@ class ParseRegression:
 			print(f'File not found: {self.filename}')
 		elif isinstance(error, PermissionError):
 			print(f'Permission denied while trying to open the file: {self.filename}')
+		elif isinstance(error, pd.errors.EmptyDataError):
+			print(f'Datafile: {self.filename} is empty.')
+
 		else:
 			print(f'I/O error occured while reading the file: {self.filename}')
 			print(f'Error details: {error}')
@@ -70,7 +73,7 @@ class ParseRegression:
 
 
 
-	def split_dataset(self):
+	def split_dataset(self, train_percentage, test_percentage):
 		total_percentage = 100
 		self.train_percentage = self.get_percentage("\n\nEnter the percentage for training data; \nSuggested values are: 80% for training, 20% for evaluating: ")
 		self.test_percentage = self.get_percentage("Enter the percentage for evaluation data: ")
