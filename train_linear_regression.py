@@ -23,15 +23,14 @@ def main():
 
 	#preprocess data and split into datasets
 	parse_instance = DatasetProcessor(train_percentage, test_percentage)
-	parse_instance.read_csv()
-	parse_instance.split_dataset(train_percentage, test_percentage)
-	parse_instance.save_datasets()
+	parse_instance.process_data()
+
 
 	#use splitted datasets with specified learning rate and convergence treshold
 	linear_regression_instance = LinearRegression(learning_rate, convergence_treshold)
-	linear_regression_instance.read_csv()
-	linear_regression_instance.assign_mileage_and_price()
-	result = linear_regression_instance.gradient_descent()
+	# linear_regression_instance.read_csv()
+	# linear_regression_instance.assign_mileage_and_price()
+	result = linear_regression_instance.run_linear_regression()
 
 	#if plot or plot_mse options were requested, plot then
 	plot_regression_instance = PlotRegression(linear_regression_instance.iterations,
@@ -49,6 +48,7 @@ def main():
 	#save results and print it to display
 	linear_regression_instance.save_thetas(result)
 	linear_regression_instance.print_to_terminal()
+
 
 
 

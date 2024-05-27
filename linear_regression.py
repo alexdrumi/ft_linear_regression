@@ -20,7 +20,7 @@ class LinearRegression:
 
 		self.theta0 = 0 #intercept
 		self.theta1 = 0 #slope
-		
+
 		self.learning_rate = learning_rate
 		self.convergence_threshold = convergence_treshold
 		self.max_iterations = max_iterations
@@ -31,7 +31,7 @@ class LinearRegression:
 		self.derivative_slope = 0
 		self.step_size_intercept = 0
 		self.step_size_slope = 0
-		
+
 		#data
 		self.mileage = 0
 		self.price = 0
@@ -47,24 +47,24 @@ class LinearRegression:
 
 
 
+	# def read_csv(self):
+	# 	try:
+	# 		df = pd.read_csv(self.filename)
+	# 		self.df = df
+	# 	except (FileNotFoundError, PermissionError, IOError) as e:
+	# 		self.handle_file_error(e)
 	def read_csv(self):
-		try:
-			df = pd.read_csv(self.filename)
-			self.df = df
-		except (FileNotFoundError, PermissionError, IOError) as e:
-			self.handle_file_error(e)
-
+		df = pd.read_csv(self.filename)
+		self.df = df
 
 
 	def handle_file_error(self, error):
-
 		if isinstance(error, FileNotFoundError):
-			print(f'File not found: {self.filename}')
+			sys.exit(f'File not found: {self.filename}, exiting program.')
 		elif isinstance(error, PermissionError):
-			print(f'Permission denied while trying to open the file: {self.filename}')
+			sys.exit(f'Permission denied while trying to open the file: {self.filename}, exiting program.')
 		else:
-			print(f'I/O error occured while reading the file: {self.filename}')
-			print(f'Error details: {error}')
+			sys.exit(f'I/O error occurred while reading the file: {self.filename}\nError details: {error}, exiting program.')
 
 
 
@@ -114,7 +114,7 @@ class LinearRegression:
 
 	g'(u) * h'(b) = 2u * -1
 	= 2(y-(b+0.5x)) * -1
-	= -2(y-(b+0.5x)) 
+	= -2(y-(b+0.5x))
 
 	dSSR/dIntercept = -2(observed_price-(intercept + 0.5 * observed_mileage))
 	------------------------------------------------------------------------------
@@ -155,7 +155,7 @@ class LinearRegression:
 	# 	dh_db = -1
 	# 	# derivative of SSR respect to intercept, applying chain rule (this is 1/m in the subject)
 	# 	dMSE_db = (2/n) * np.sum(h * dh_db)
-  
+
 	# 	# derivative of h respect to slope
 	# 	dh_dc = -x
 	# 	# derivative of SSR respect to slope, applying chain rule, divided by n (this is 1/m in the subject)
@@ -164,7 +164,7 @@ class LinearRegression:
 
 	def compute_MSE_gradients(self):
 		x, y = self.mileage, self.price
-		b, c = self.theta0, self.theta1 
+		b, c = self.theta0, self.theta1
 		n = len(self.price)
 
 		residuals = y - (b + c * x)
@@ -172,7 +172,7 @@ class LinearRegression:
 		dMSE_dc = -2 * np.mean(residuals * x) #this is a faster calculation than summing and dividing/multiplying
 
 		return dMSE_db, dMSE_dc
-	
+
 
 
 	def min_max_normalize(self, array):
@@ -234,7 +234,7 @@ class LinearRegression:
 			self.derivative_intercept, self.derivative_slope = self.compute_MSE_gradients()
 
 			self.step_size_intercept = self.learning_rate * self.derivative_intercept
-			self.step_size_slope = self.learning_rate * self.derivative_slope 
+			self.step_size_slope = self.learning_rate * self.derivative_slope
 
 			self.theta0 -= self.step_size_intercept
 			self.theta1 -= self.step_size_slope
@@ -246,13 +246,13 @@ class LinearRegression:
 				break
 
 			self.iterations += 1
-		
+
 		return self.theta0, self.theta1
 
 
 
 	def print_to_terminal(self):
-		print(f"\033[92mTraining Update:"
+		print(f"\033[92mTraining Updatea:"
 			f"\n\033[92mIterations it took to train: \033[97m{self.iterations}"
 			f"\n\033[92mLearning Rate: \033[97m{self.learning_rate}"
 			f"\n\033[92mMax Iterations: \033[97m{self.max_iterations}"
@@ -261,3 +261,26 @@ class LinearRegression:
 			f"\n\033[92mTheta1 (Slope): \033[97m{self.theta1}"
 			f"\n\033[92mMSE: \033[97m{self.compute_MSE()}"
 			f"\n\033[92mRMSE: \033[97m{self.compute_RMSE()}")
+
+
+
+	def run_linear_regression(self):
+		try:
+			self.read_csv()
+			self.assign_mileage_and_price()
+			result = self.gradient_descent()
+			return result
+		except (FileNotFoundError, PermissionError, IOError, ValueError) as e:
+			self.handle_file_error(e)
+			sys.exit(1)
+
+			
+	
+	# def handle_file_error(self, error):
+	# 	if isinstance(error, FileNotFoundError):
+	# 		sys.exit(f'File not found: {self.filename}, exiting program.')
+	# 	elif isinstance(error, PermissionError):
+	# 		sys.exit(f'Permission denied while trying to open the file: {self.filename}, exiting program.')
+	# 	else:
+	# 		sys.exit(f'I/O error occurred while reading the file: {self.filename}\nError details: {error}, exiting program.')
+
