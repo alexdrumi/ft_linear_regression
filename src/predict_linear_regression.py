@@ -45,7 +45,7 @@ def main():
 			price_max
 		)
 		
-		print(f"The estimated price for a car with {mileage} km is: ${predicted_price:.2f}")
+		print(f"\033[92mThe estimated price for a car with {mileage} km is: ${predicted_price:.2f}")
 	except Exception as e:
 		error_handler.handle_error(e)
 

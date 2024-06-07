@@ -96,7 +96,7 @@ class DatasetProcessor:
 
 	def process_data(self):
 		try:
-			logging.info("Starting data processing...")
+			logging.info("\033[92mStarting data processing...")
 			self.read_csv()
 			self.split_dataset()
 			self.save_datasets()

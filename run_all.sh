@@ -13,7 +13,7 @@ if [ $? -eq 0 ]; then
     echo "Starting the prediction process..."
     
     # Run the prediction script
-    python3 predict_ft_linear_regression.py
+    python3 predict_linear_regression.py
 else
     echo "Training failed. Exiting."
 fi
