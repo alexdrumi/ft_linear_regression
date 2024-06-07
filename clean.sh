@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-files=("data/thetas.txt" "data/testing_data.csv" "data/training_data.csv")
+files=("src/thetas.txt" "data/testing_data.csv" "data/training_data.csv")
 
 
 for file in "${files[@]}"; do
