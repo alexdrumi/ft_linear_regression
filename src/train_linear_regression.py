@@ -1,6 +1,6 @@
-#!/Library/Frameworks/Python.framework/Versions/3.10/bin/python3
-import sys
+#!/opt/homebrew/bin/python3import sys
 import signal
+import sys
 
 from linear_regression import LinearRegression
 from dataset_processor import DatasetProcessor
@@ -17,19 +17,13 @@ def signal_handler(signum, frame):
 
 
 def main():
-	#parse from command line
 	arg_parser = CommandLineParser()
 	plot, plot_mse, learning_rate, convergence_treshold, train_percentage, test_percentage = arg_parser.parse_arguments()
 
-	#preprocess data and split into datasets
 	parse_instance = DatasetProcessor(train_percentage, test_percentage)
 	parse_instance.process_data()
 
-
-	#use splitted datasets with specified learning rate and convergence treshold
 	linear_regression_instance = LinearRegression(learning_rate, convergence_treshold)
-	# linear_regression_instance.read_csv()
-	# linear_regression_instance.assign_mileage_and_price()
 	result = linear_regression_instance.run_linear_regression()
 
 	#if plot or plot_mse options were requested, plot then
@@ -45,7 +39,6 @@ def main():
 	if plot_mse:
 		plot_regression_instance.plot_mse_history()
 
-	#save results and print it to display
 	linear_regression_instance.save_thetas(result)
 	linear_regression_instance.print_to_terminal()
 

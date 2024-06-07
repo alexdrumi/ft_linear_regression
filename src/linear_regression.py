@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import os
 
 
 
@@ -11,12 +12,16 @@ import sys
 #!/Library/Frameworks/Python.framework/Versions/3.10/bin/python3
 '''
 
+from error_handler import ErrorHandler
+
 
 class LinearRegression:
 
 	def __init__(self, learning_rate, convergence_treshold, max_iterations=8000):
 		self.df = None
-		self.filename = 'training_data.csv'
+		script_dir = os.path.dirname(__file__)
+		self.filename = os.path.join(script_dir, '../data/training_data.csv')
+		self.theta_file = os.path.join(script_dir, '../data/thetas.txt')
 
 		self.theta0 = 0 #intercept
 		self.theta1 = 0 #slope
@@ -39,32 +44,19 @@ class LinearRegression:
 		#mse history
 		self.mse_history = [self.compute_MSE()]
 
+		#error handler
+		self.error_handler = ErrorHandler()
 
 
 	def assign_mileage_and_price(self):
-			self.mileage = self.min_max_normalize(self.df['km'].values)
-			self.price = self.min_max_normalize(self.df['price'].values)
+		self.mileage = self.min_max_normalize(self.df['km'].values, self.df['km'].min(), self.df['km'].max())
+		self.price = self.min_max_normalize(self.df['price'].values, self.df['price'].min(), self.df['price'].max())
 
 
 
-	# def read_csv(self):
-	# 	try:
-	# 		df = pd.read_csv(self.filename)
-	# 		self.df = df
-	# 	except (FileNotFoundError, PermissionError, IOError) as e:
-	# 		self.handle_file_error(e)
 	def read_csv(self):
 		df = pd.read_csv(self.filename)
 		self.df = df
-
-
-	def handle_file_error(self, error):
-		if isinstance(error, FileNotFoundError):
-			sys.exit(f'File not found: {self.filename}, exiting program.')
-		elif isinstance(error, PermissionError):
-			sys.exit(f'Permission denied while trying to open the file: {self.filename}, exiting program.')
-		else:
-			sys.exit(f'I/O error occurred while reading the file: {self.filename}\nError details: {error}, exiting program.')
 
 
 
@@ -161,7 +153,6 @@ class LinearRegression:
 	# 	# derivative of SSR respect to slope, applying chain rule, divided by n (this is 1/m in the subject)
 	# 	dMSE_dc = (2/n) * np.sum(h * dh_dc)
 	# 	return (dMSE_db, dMSE_dc)
-
 	def compute_MSE_gradients(self):
 		x, y = self.mileage, self.price
 		b, c = self.theta0, self.theta1
@@ -175,12 +166,15 @@ class LinearRegression:
 
 
 
-	def min_max_normalize(self, array):
-		x_min = np.min(array)
-		x_max = np.max(array)
-		array_normalized = (array - x_min)/(x_max - x_min)
-
-		return array_normalized
+	# def min_max_normalize(self, value, min_value, max_value):
+	# 	if min_value == max_value:
+	# 		return 0
+	# 	normalized = (value - min_value) / (max_value - min_value)
+	# 	return normalized
+	def min_max_normalize(self, value, min_value, max_value):
+		if min_value == max_value:
+			return np.zeros_like(value) if isinstance(value, np.ndarray) else 0
+		return (value - min_value) / (max_value - min_value)
 
 
 
@@ -188,7 +182,6 @@ class LinearRegression:
 		intercept_converged = abs(self.step_size_intercept) < self.convergence_threshold
 		slope_converged = abs(self.step_size_slope) < self.convergence_threshold
 		result = intercept_converged and slope_converged
-
 		return result
 
 
@@ -201,7 +194,6 @@ class LinearRegression:
 
 	def save_thetas(self, thetas):
 		with open('thetas.txt', 'w') as file:
-			print(f'{thetas[0]}, {thetas[1]}')
 			file.write(str(thetas[0]) + "\n")
 			file.write(str(thetas[1]) + "\n")
 		file.close()
@@ -217,12 +209,10 @@ class LinearRegression:
 
 
 	def predict_price(self, mileage, theta0, theta1, min_km, max_km, min_price, max_price):
-		normalized_mileage = self.min_max_normalize(mileage)
-		# Predict price in normalized scale
-		normalized_price = theta1 * normalized_mileage + theta0
-		# Convert normalized price back to dollar price
-		price_in_dollars = normalized_price * (max_price - min_price) + min_price
-		return price_in_dollars
+		normalized_mileage = self.min_max_normalize(mileage, min_km, max_km)
+		normalized_price = theta0 + theta1 * normalized_mileage
+		predicted_price = normalized_price * (max_price - min_price) + min_price
+		return predicted_price
 
 
 
@@ -252,7 +242,7 @@ class LinearRegression:
 
 
 	def print_to_terminal(self):
-		print(f"\033[92mTraining Updatea:"
+		print(f"\n\033[92mTraining Update:"
 			f"\n\033[92mIterations it took to train: \033[97m{self.iterations}"
 			f"\n\033[92mLearning Rate: \033[97m{self.learning_rate}"
 			f"\n\033[92mMax Iterations: \033[97m{self.max_iterations}"
@@ -260,7 +250,8 @@ class LinearRegression:
 			f"\n\033[92mTheta0 (Intercept): \033[97m{self.theta0}"
 			f"\n\033[92mTheta1 (Slope): \033[97m{self.theta1}"
 			f"\n\033[92mMSE: \033[97m{self.compute_MSE()}"
-			f"\n\033[92mRMSE: \033[97m{self.compute_RMSE()}")
+			f"\n\033[92mRMSE: \033[97m{self.compute_RMSE()}\n\n",
+			f"\n\033[92mLINEAR REGRESSION TRAINING IS COMPLETE.\033[97m")
 
 
 
@@ -271,16 +262,4 @@ class LinearRegression:
 			result = self.gradient_descent()
 			return result
 		except (FileNotFoundError, PermissionError, IOError, ValueError) as e:
-			self.handle_file_error(e)
-			sys.exit(1)
-
-			
-	
-	# def handle_file_error(self, error):
-	# 	if isinstance(error, FileNotFoundError):
-	# 		sys.exit(f'File not found: {self.filename}, exiting program.')
-	# 	elif isinstance(error, PermissionError):
-	# 		sys.exit(f'Permission denied while trying to open the file: {self.filename}, exiting program.')
-	# 	else:
-	# 		sys.exit(f'I/O error occurred while reading the file: {self.filename}\nError details: {error}, exiting program.')
-
+			self.error_handler.handle_error(e, self.filename)
