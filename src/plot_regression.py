@@ -35,6 +35,8 @@ class PlotRegression:
 
 
 
+	#THIS DOESNT WORK YET, THERE IS SOME BUG SOMEWHERE!
+	#ValueError: x and y must have same first dimension, but have shapes (800100,) and (8001,)
 	def plot_mse_history(self):
 		#take a look how many mse parts do we have?
 		plt.figure(figsize=(10, 6))
