@@ -1,4 +1,3 @@
-#!/opt/homebrew/bin/python3
 import logging
 import sys
 import pandas as pd

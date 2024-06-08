@@ -1,19 +1,8 @@
-#!/Library/Frameworks/Python.framework/Versions/3.10/bin/python3
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import sys
 import os
 
-
-
-'''
-#!/opt/homebrew/bin/python3
-#!/Library/Frameworks/Python.framework/Versions/3.10/bin/python3
-'''
-
 from error_handler import ErrorHandler
-
 
 class LinearRegression:
 
@@ -48,9 +37,20 @@ class LinearRegression:
 		self.error_handler = ErrorHandler()
 
 
+
 	def assign_mileage_and_price(self):
-		self.mileage = self.min_max_normalize(self.df['km'].values, self.df['km'].min(), self.df['km'].max())
-		self.price = self.min_max_normalize(self.df['price'].values, self.df['price'].min(), self.df['price'].max())
+		km_min = self.df['km'].min()
+		km_max = self.df['km'].max()
+		price_min = self.df['price'].min()
+		price_max = self.df['price'].max()
+
+		if km_min == km_max:
+			raise ValueError("Zero variance in 'km' column.")
+		if price_min == price_max:
+			raise ValueError("Zero variance in 'price' column.")
+
+		self.mileage = self.min_max_normalize(self.df['km'].values, km_min, km_max)
+		self.price = self.min_max_normalize(self.df['price'].values, price_min, price_max)
 
 
 
@@ -61,7 +61,7 @@ class LinearRegression:
 
 
 	def compute_MSE(self):
-		predictions = self.theta0 + self.theta1 * self.mileage #theta0 = intercept + slope * mileage
+		predictions = self.theta0 + (self.theta1 * self.mileage) #theta0 = intercept + slope * mileage
 		return np.mean((self.price - predictions) ** 2)
 
 
@@ -75,6 +75,7 @@ class LinearRegression:
 		predictions = self.theta0 + self.theta1 * self.mileage
 		mae = np.mean(np.abs(self.price - predictions))
 		return mae
+
 
 
 	'''
@@ -153,24 +154,35 @@ class LinearRegression:
 	# 	# derivative of SSR respect to slope, applying chain rule, divided by n (this is 1/m in the subject)
 	# 	dMSE_dc = (2/n) * np.sum(h * dh_dc)
 	# 	return (dMSE_db, dMSE_dc)
+
+
+
+	'''
+	residuals = price - estimatePrice(mileage) -> price - (theta0 + theta1 * mileage) 
+	this gives us the differences between actual prices and estimated prices.
+
+	substituting in the provided formulas:
+	tmp0 = learningRate * (1/m) * sum(residuals)
+	tmp1 = learningRate * (1/m) * sum(residuals * mileage)
+	
+	in the code below, dMSE_db and dMSE_dc are the gradients of the MSE with respect to 
+	theta0 (intercept) and theta1 (slope) respectively. The learning rate is applied in 
+	the main gradient_descent function.
+	'''
 	def compute_MSE_gradients(self):
 		x, y = self.mileage, self.price
 		b, c = self.theta0, self.theta1
 		n = len(self.price)
 
 		residuals = y - (b + c * x)
-		dMSE_db = -2 * np.mean(residuals) #this is a faster calculation than summing and dividing/multiplying
-		dMSE_dc = -2 * np.mean(residuals * x) #this is a faster calculation than summing and dividing/multiplying
+		
+		dMSE_db = -2 * np.mean(residuals) #gradient with respect to theta0 (intercept) this is a faster calculation than summing and dividing/multiplying
+		dMSE_dc = -2 * np.mean(residuals * x) #gradient with respect to theta1 (slope) this is a faster calculation than summing and dividing/multiplying
 
 		return dMSE_db, dMSE_dc
 
 
 
-	# def min_max_normalize(self, value, min_value, max_value):
-	# 	if min_value == max_value:
-	# 		return 0
-	# 	normalized = (value - min_value) / (max_value - min_value)
-	# 	return normalized
 	def min_max_normalize(self, value, min_value, max_value):
 		if min_value == max_value:
 			return np.zeros_like(value) if isinstance(value, np.ndarray) else 0
@@ -208,16 +220,16 @@ class LinearRegression:
 
 
 
-	def predict_price(self, mileage, theta0, theta1, min_km, max_km, min_price, max_price):
+	def estimate_price(self, mileage, theta0, theta1, min_km, max_km, min_price, max_price):
 		normalized_mileage = self.min_max_normalize(mileage, min_km, max_km)
-		normalized_price = theta0 + theta1 * normalized_mileage
+		normalized_price = theta0 + (theta1 * normalized_mileage)
 		predicted_price = normalized_price * (max_price - min_price) + min_price
 		return predicted_price
 
 
 
 	'''
-	Take a look at RMSprop, Adam, or incorporating learning rate schedules later.
+	Take a look at RMSprop, Adam, or incorporating learning rate schedules eventually
 	'''
 	def gradient_descent(self):
 		while (self.iterations < self.max_iterations):

@@ -1,8 +1,20 @@
 import pandas as pd
+import signal
+import sys
+
 from linear_regression import LinearRegression
 from error_handler import ErrorHandler
 
+def signal_handler(sig, frame):
+	print("\nProcess terminated. Exiting as gracefully as we can.")
+	sys.exit(0)
+
+
+
 def main():
+	signal.signal(signal.SIGINT, signal_handler)
+	signal.signal(signal.SIGTERM, signal_handler)
+
 	error_handler = ErrorHandler()
 	learning_rate = 0.01
 	convergence_threshold = 0.0000001
@@ -33,9 +45,8 @@ def main():
 		error_handler.log_message("Invalid input. Please enter a valid number for mileage.")
 		return
 
-	
 	try:
-		predicted_price = linear_regression_instance.predict_price(
+		predicted_price = linear_regression_instance.estimate_price(
 			mileage,
 			theta0,
 			theta1,
@@ -48,6 +59,8 @@ def main():
 		print(f"\033[92mThe estimated price for a car with {mileage} km is: ${predicted_price:.2f}")
 	except Exception as e:
 		error_handler.handle_error(e)
+
+
 
 if __name__ == '__main__':
 	main()

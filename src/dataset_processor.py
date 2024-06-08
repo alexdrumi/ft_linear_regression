@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import logging
-import sys
 import os
 
 from error_handler import ErrorHandler
@@ -53,11 +52,6 @@ class DatasetProcessor:
 	def split_dataset(self):
 		if self.df is None:
 			raise ValueError("Dataframe is empty. Make sure to read data first.")
-
-		total_percentage = 100
-		if self.train_percentage + self.test_percentage > total_percentage:
-			raise ValueError("The sum of train and test percentages cannot exceed 100%.")
-
 		self.split_to_given_percentages()
 		self.validate_datasets()
 
@@ -81,7 +75,6 @@ class DatasetProcessor:
 
 
 
-
 	def check_for_missing_values(self, data, name):
 		if data is not None and data.isnull().values.any():
 			raise ValueError(f"There might be missing or incorrect values in the {name} dataset.")
@@ -96,7 +89,7 @@ class DatasetProcessor:
 
 	def process_data(self):
 		try:
-			logging.info("\033[92mStarting data processing...")
+			logging.info("\033[92mStarting data processing...\033[0m")
 			self.read_csv()
 			self.split_dataset()
 			self.save_datasets()

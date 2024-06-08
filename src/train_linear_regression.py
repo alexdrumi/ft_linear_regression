@@ -1,4 +1,3 @@
-#!/opt/homebrew/bin/python3import sys
 import signal
 import sys
 
@@ -6,8 +5,6 @@ from linear_regression import LinearRegression
 from dataset_processor import DatasetProcessor
 from command_line_parser import CommandLineParser
 from plot_regression import PlotRegression
-
-
 
 def signal_handler(signum, frame):
 	signame = signal.Signals(signum).name
@@ -26,7 +23,6 @@ def main():
 	linear_regression_instance = LinearRegression(learning_rate, convergence_treshold)
 	result = linear_regression_instance.run_linear_regression()
 
-	#if plot or plot_mse options were requested, plot then
 	plot_regression_instance = PlotRegression(linear_regression_instance.iterations,
 	linear_regression_instance.theta0, 
 	linear_regression_instance.theta1, 
@@ -41,7 +37,6 @@ def main():
 
 	linear_regression_instance.save_thetas(result)
 	linear_regression_instance.print_to_terminal()
-
 
 
 

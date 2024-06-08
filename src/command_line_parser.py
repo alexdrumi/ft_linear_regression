@@ -1,19 +1,16 @@
-#!/opt/homebrew/bin/python3
 import sys
 import argparse
-
-
+from error_handler import ErrorHandler
 
 class CommandLineParser:
 	def __init__(self):
+		self.error_handler = ErrorHandler()
 		self.parser = argparse.ArgumentParser(
 			description=self.get_description(),
 			usage=self.get_usage(),
 			formatter_class=argparse.RawTextHelpFormatter
 		)
 		self.add_arguments()
-
-
 
 	def get_usage(self):
 		usage_text = (
@@ -27,8 +24,6 @@ class CommandLineParser:
 		)
 		return usage_text
 
-
-
 	def get_description(self):
 		description_text = (
 			"\033[1;36mThis script runs linear regression on a dataset with optional plotting.\033[0m\n"
@@ -40,30 +35,24 @@ class CommandLineParser:
 		)
 		return description_text
 
-
-
 	def add_arguments(self):
 		self.parser.add_argument('--plt', type=str, default='false', choices=['true', 'false'],
-								 help='Enable or disable the plot of the result of the regression model.')
+								 help='Enable or disable the plot of the result of the regression model.\n')
 		self.parser.add_argument('--plt_mse', type=str, default='false', choices=['true', 'false'],
-								 help='Enable or disable the plot of Mean Squared Error of the regression model.')
+								 help='Enable or disable the plot of Mean Squared Error of the regression model.\n')
 		self.parser.add_argument('--learning_rate', type=float, default=0.01,
-								 help='Initial learning rate for gradient descent.')
+								 help='Initial learning rate for gradient descent.\n')
 		self.parser.add_argument('--convergence_threshold', type=float, default=0.0000001,
-								 help='Convergence threshold for stopping criterion.')
+								 help='Convergence threshold for stopping criterion.\n')
 		self.parser.add_argument('--train_percentage', type=float, default=100,
-								 help='The amount of percentages of the original dataset for training the model.')
+								 help='The amount of percentages of the original dataset for training the model.\n')
 		self.parser.add_argument('--test_percentage', type=float, default=0,
-								 help='The amount of percentages of the original dataset for testing the model.')
-
-
+								 help='The amount of percentages of the original dataset for testing the model.\n')
 
 	def parse_arguments(self):
-
 		if len(sys.argv) > 7:
 			self.parser.print_help(sys.stderr)
 			sys.exit(1)
-
 
 		args = self.parser.parse_args()
 
@@ -74,5 +63,18 @@ class CommandLineParser:
 		convergence_treshold = args.convergence_threshold
 		test_percentage = args.test_percentage
 		train_percentage = args.train_percentage
+
+		#raise problems here w error handler
+		try:
+			if train_percentage + test_percentage > 100:
+				raise ValueError("The sum of train and test percentages cannot exceed 100%.")
+			if train_percentage < 0 or train_percentage > 100 or test_percentage < 0 or test_percentage > 100:
+				raise ValueError("The percentages have to be within the range of 0 <= percentage <= 100.")
+			if learning_rate < 1e-6 or learning_rate > 2e-1:
+				raise ValueError("Learning rate has to be within the range of 1e-6 <= learning rate <= 2e-1.")
+			if convergence_treshold < 1e-7 or convergence_treshold > 1e-5:
+				raise ValueError("The convergence threshold has to be in the range of 1e-7 <= convergence threshold <= 1e-5.")
+		except ValueError as e:
+			self.error_handler.log_message(str(e))
 
 		return plot, plot_mse, learning_rate, convergence_treshold, train_percentage, test_percentage
