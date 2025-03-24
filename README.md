@@ -5,11 +5,9 @@
 
 <br />
 <div align="center">
-  <!-- If you have a logo or banner, you can include it here
   <a href="https://github.com/alexdrumi/ft_linear_regression">
     <img src="assets/lin_reg.jpg" alt="lin_reg.jpg" width="550" height="300">
   </a>
-  -->
 
   <h3 align="center">Linear Regression Project</h3>
   <p align="center">
@@ -56,7 +54,6 @@ Follow these instructions to set up the project locally.
 4. **Predict:**
    ```bash
    python src/predict.py
-
 
 ## Media
 
